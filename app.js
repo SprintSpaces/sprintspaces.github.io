@@ -18,12 +18,12 @@ navigation?.querySelectorAll('a').forEach(link => link.addEventListener('click',
 document.addEventListener('keydown', event => { if (event.key === 'Escape') closeMenu(); });
 
 const views = {
-  board: ['WSPÓLNY RYTM ZESPOŁU', 'Wiesz, co jest do zrobienia. I co już zrobione.', 'Zadania, osoby, priorytety i terminy na jednej tablicy. Filtruj widok i przesuwaj karty zgodnie z procesem swojej przestrzeni.', 'Tablica Kanban z zadaniami, statusami, osobami i terminami.'],
-  projects: ['OD PROJEKTU DO KONKRETNEGO ZADANIA', 'Duży projekt. Czytelne etapy. Jasny podział pracy.', 'Zobacz etapy, postęp i odpowiedzialność. Zadania zaimportowane z Excela mogą zachować odnośnik do arkusza i komórki źródłowej.', 'Projekt z etapami, zadaniami, statusami, osobami i odnośnikami do źródła Excel.'],
-  ticket: ['KONTEKST ZOSTAJE PRZY SPRAWIE', 'Jedno zadanie. Wszystkie ustalenia.', 'Opis, dyskusja, pliki, akceptacje i historia w jednym miejscu. Wróć do decyzji bez przekopywania skrzynki pocztowej.', 'Karta zadania SprintSpaces z opisem, komentarzami, szczegółami i panelem czasu pracy.'],
-  timeline: ['TERMINY W PEŁNYM OBRAZIE', 'Zobacz, co przed Wami. I co wymaga uwagi.', 'Oś czasu łączy zapisane terminy i planowane początki. Filtruj po osobie lub typie zadania i sprawdzaj plan projektu.', 'Oś czasu projektu z terminami etapów i zadań.'],
-  time: ['CZAS PRZYPISANY DO PRACY', 'Od wpisu w kalendarzu do rozliczonego tygodnia.', 'Rejestruj pracę przy konkretnym zadaniu. Edytuj wpisy w kalendarzu, korzystaj z timera i eksportuj dane do CSV.', 'Kalendarz ewidencji czasu pracy z wpisami przypisanymi do zadań.'],
-  reports: ['ZAMIAST KOLEJNEGO PYTANIA O STATUS', 'Sprawdź postęp. Zauważ zaległości. Działaj.', 'Podgląd statusów, obciążenia i czasu pracy. Twórz też własne raporty z harmonogramem oraz opcjonalnym podsumowaniem AI.', 'Raport projektu ze statusami, obciążeniem osób, zaległościami i czasem pracy.']
+  board: ['TABLICA ZESPOŁU', 'Kto pracuje nad czym i na jakim jest etapie?', 'Na tablicy zobaczysz zadania, przypisane osoby, priorytety i terminy. Filtruj widok według potrzeb i zmieniaj status zadań, przesuwając karty.', 'Tablica Kanban z zadaniami, statusami, osobami i terminami.'],
+  projects: ['PROJEKTY I ETAPY', 'Od planu projektu do zadań poszczególnych osób.', 'Podziel pracę na etapy, przypisz zadania i sprawdzaj postęp. Przy danych przeniesionych z Excela możesz zachować odnośnik do arkusza i komórki źródłowej.', 'Projekt z etapami, zadaniami, statusami, osobami i odnośnikami do źródła Excel.'],
+  ticket: ['SZCZEGÓŁY ZADANIA', 'Ustalenia, pliki i historia przy jednej sprawie.', 'Przeczytaj opis i rozmowę, sprawdź załączniki oraz wcześniejsze decyzje. Z tego samego widoku zmienisz dostępne pola, dodasz komentarz i zapiszesz czas pracy.', 'Karta zadania SprintSpaces z opisem, komentarzami, szczegółami i panelem czasu pracy.'],
+  timeline: ['PLAN I TERMINY', 'Zobacz, kiedy zaczynają się i kończą zadania.', 'Oś czasu pokazuje zapisane daty rozpoczęcia, wysyłki i zakończenia. Zmień skalę z tygodniowej na miesięczną lub zawęź widok do wybranej osoby, typu zadania czy sprintu.', 'Oś czasu projektu z terminami etapów i zadań.'],
+  time: ['EWIDENCJA CZASU', 'Sprawdź, na co poświęcasz czas w ciągu tygodnia.', 'Dodawaj i poprawiaj wpisy w kalendarzu lub korzystaj z pomiaru czasu przy zadaniu. Gotową kartę tygodnia możesz wysłać do zatwierdzenia, a dane wyeksportować do CSV.', 'Kalendarz ewidencji czasu pracy z wpisami przypisanymi do zadań.'],
+  reports: ['POSTĘP I OBCIĄŻENIE', 'Sprawdź, co jest gotowe i co wymaga uwagi.', 'Zobacz statusy zadań, zaległe terminy, obciążenie osób i zapisany czas pracy. W osobnym module raportów ustawisz też cykliczną wysyłkę e-mailem i opcjonalne podsumowanie AI.', 'Raport projektu ze statusami, obciążeniem osób, zaległościami i czasem pracy.']
 };
 const tabs = [...document.querySelectorAll('[data-view]')];
 function selectView(tab) {
@@ -101,7 +101,7 @@ form?.addEventListener('submit', async event => {
     const response = await fetch(form.action, { method: 'POST', body: new FormData(form), headers: {'Accept': 'application/json'}, signal: controller.signal });
     if (!response.ok) throw new Error('Nie udało się wysłać wiadomości');
     feedback.dataset.state = 'success';
-    feedback.textContent = 'Dziękuję za wiadomość! Odezwę się, aby omówić pilotaż i potwierdzić termin rozmowy.';
+    feedback.textContent = 'Dziękuję za wiadomość! Odezwę się, żeby omówić wdrożenie testowe i ustalić termin rozmowy.';
     form.reset();
   } catch {
     feedback.dataset.state = 'error';

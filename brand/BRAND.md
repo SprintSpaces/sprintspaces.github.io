@@ -4,7 +4,7 @@
 
 - Nazwa: **SprintSpaces** (łącznie, wielkie S i S). Logotyp: Sprint zwykłe, Spaces pogrubione.
 - Hasło marki: **Przestrzeń na dobrą pracę.**
-- Hasło strony sprzedażowej: **Mniej arkuszy. Więcej zrobione.**
+- Hasło strony sprzedażowej: **Mniej arkuszy. Więcej porządku.**
 - Opis: Projekty, zadania i zgłoszenia w jednej przestrzeni.
 - Zachowano znak z aplikacji: kwadrat z rogami o promieniu 8/32 szerokości i trzema białymi liniami (ostatnia krótsza). Główny błękit ujednolicono z aktualnym interfejsem aplikacji: #0C66E4.
 
@@ -44,6 +44,14 @@ Pole ochronne co najmniej ¼ szerokości znaku. Minimalny znak 24 px. Nie rozci�
 
 WWW: systemowy font bezszeryfowy jak w aplikacji. Mailing: Arial, Helvetica, sans-serif. Krótkie polskie zdania, konkretne zadanie/status/termin, spokojny ton. Bez marketingowych obietnic w powiadomieniach operacyjnych.
 
+### Jak opisywać produkt
+
+- Wyjaśniaj konkretną czynność i efekt: „Wyślij kartę tygodnia do zatwierdzenia”, „Zobacz zadania po terminie”. Unikaj ogólników takich jak „pełny kontekst” czy „wspólny rytm zespołu”.
+- Przy pierwszym użyciu wyjaśnij „przestrzeń”: miejsce dla zespołu lub projektu z własnymi statusami, polami i formularzami.
+- Pisz do jednej osoby („Twój zespół”, „wybierz”), a czynności zespołowe nazywaj wprost. Nie przeplataj przypadkowo form „Ty” i „Wy”.
+- Rozróżniaj migrację danych, konfigurację integracji i codzienne funkcje aplikacji. Dane z Arkuszy Google importujemy z eksportu; dwukierunkowa synchronizacja Excela w SharePoint/OneDrive wymaga konfiguracji wybranych pól.
+- Zaproszenie dotyczy darmowego wdrożenia testowego. Zakres, czas i ewentualne koszty usług zewnętrznych są ustalane przed startem.
+
 ## Mailing — instrukcja dla Claude
 
 - Nazwa nadawcy i nagłówek: SprintSpaces; nie zmieniać technicznego adresu skrzynki bez potrzeby.
@@ -53,7 +61,7 @@ WWW: systemowy font bezszeryfowy jak w aplikacji. Mailing: Arial, Helvetica, san
 - Główne CTA #0C66E4 z białym tekstem; linki #0C66E4. Informacje hierarchicznie: rodzaj zdarzenia, kod i tytuł (tylko jeśli dozwolone), autor/zmiana, komentarz, link do sprawy, dostępna historia.
 - Stopka produktowa: SprintSpaces — przestrzeń na dobrą pracę. Link aplikacyjny używa adresu danej instancji; marketing: https://sprintspaces.github.io/.
 - Zachować istniejące ACL, poufność, threading, outbox, pełną autoryzowaną historię i wariant tekstowy. Branding nie poszerza odbiorców ani treści. Bez testowych maili do ludzi.
-- Spinka: asystent wspomagający obsługę aplikacji, opcjonalna integracja ElevenLabs. Własny agent (np. Claude): połączenie przez MCP z uprawnieniami użytkownika i potwierdzaniem zmian.
+- Spinka: asystent wspomagający obsługę aplikacji, opcjonalna integracja ElevenLabs. Własny agent (np. Claude): połączenie przez MCP z uprawnieniami użytkownika i zakresem dostępu zatwierdzonym w SprintSpaces. Domyślnie zaznaczony jest tylko odczyt zwykłych zgłoszeń; dodatkowe zakresy użytkownik włącza osobno. Potwierdzenie operacji w rozmowie opisujemy jako zachowanie Spinki, nie jako wspólną cechę wszystkich klientów MCP.
 
 ## Zakres strony
 
