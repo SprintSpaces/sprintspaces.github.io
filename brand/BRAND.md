@@ -32,6 +32,7 @@
 - Znak SVG: https://sprintspaces.github.io/assets/logo.svg
 - Znak biały SVG: https://sprintspaces.github.io/assets/logo-white.svg
 - PNG: https://sprintspaces.github.io/assets/logo-512.png oraz logo-192.png, logo-1024.png
+- Logotyp na ciemne tło PNG: https://sprintspaces.github.io/assets/wordmark-white.png
 - Logotyp SVG: https://sprintspaces.github.io/assets/wordmark.svg
 - Logotyp PNG 1104×224: https://sprintspaces.github.io/assets/wordmark.png
 - Spinka SVG: https://sprintspaces.github.io/assets/spinka.svg
