@@ -21,8 +21,8 @@ Otwórz http://127.0.0.1:4173/. Strona nie wymaga kompilacji ani zależności. G
 
 Sekcja „Wypróbuj” (`#demo`) rozmawia z usługą z repozytorium `SprintSpaces/Demo` (trzy punkty: `POST /v1/demos`, `GET /v1/demos/{job}`, `GET /v1/stats`). Adres usługi jest w `<meta name="demo-api" content="">` w `index.html`;
 **pusty = sekcja jest wyłączona** (komunikat „Demo jest chwilowo niedostępne”) i nic nie jest wysyłane. Ustaw go dopiero, gdy usługa działa i jej `DEMO_ALLOWED_ORIGINS` zawiera `https://sprintspaces.github.io`.
-Nie ma parametru zmieniającego adres usługi w locie. Licznik „aktywne N/10” i „uruchomiono łącznie” pochodzą z usługi. Logika jest w `demo-core.mjs` (testy: `node --test test/demo-core.test.mjs`), widok w `demo.js`, wygląd w `demo.css`.
-Do oglądania w przeglądarce bez usługi: `node qa/mock-demo-api.mjs` serwuje stronę z atrapą usługi i scenariuszami (`/__scenario?name=full|rate|offline|expired|badurl|normal`).
+Nie ma parametru zmieniającego adres usługi w locie. Licznik „aktywne N/10” i „uruchomiono łącznie” pochodzą z usługi. Logika jest w `demo-core.mjs` (testy: `node --test test/*.test.mjs`), widok w `demo.js`, wygląd w `demo.css`.
+Do oglądania w przeglądarce bez usługi: `node tools/mock-demo-api.mjs` serwuje stronę z atrapą usługi i scenariuszami (`/__scenario?name=full|rate|offline|expired|badurl|normal`).
 
 ## Treści i weryfikacja
 

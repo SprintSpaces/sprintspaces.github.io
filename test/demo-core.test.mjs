@@ -178,3 +178,33 @@ test('helpers: random keys, the countdown', () => {
   assert.equal(formatRemaining(61000), '1:01');
   assert.equal(formatRemaining(3 * 3600000 + 5 * 60000 + 7000), '3:05:07');
 });
+
+test('the known end of access ends the view whatever the network does, and clears the access from the state', async () => {
+  for (const next of ['down', reply(500, {}), reply(503, undefined), (_u, init) => new Promise((_, rej) => init.signal.addEventListener('abort', () => rej(new Error('hang'))))]) {
+    let t = Date.parse('2026-10-23T12:00:00Z');
+    const { demo } = make([reply(202, { job: 'j'.repeat(64) }), ready({ expires_at: '2026-10-23T12:00:30Z' }), next], { now: () => t, options: { timeoutMs: 30 } });
+    await demo.start('plain'); await demo.step();
+    assert.equal(demo.state.phase, 'ready');
+    t = Date.parse('2026-10-23T12:00:31Z');
+    assert.equal(await demo.step(), null);
+    assert.equal(demo.state.phase, 'ended');
+    assert.equal(demo.state.creds, null);
+  }
+  // a tab that wakes up after its demo ended: the clock alone decides
+  let t = Date.parse('2026-10-23T12:00:00Z');
+  const { demo, storage } = make([reply(202, { job: 'j'.repeat(64) }), ready({ expires_at: '2026-10-23T12:00:30Z' })], { now: () => t });
+  await demo.start('plain'); await demo.step();
+  t += 3600 * 1000;
+  assert.equal(demo.expireIfDue(), true);
+  assert.equal(demo.state.creds, null);
+  assert.equal(storage.getItem('sprintspaces-demo'), null);
+});
+
+test('a ready answer needs a believable end: absent, empty, malformed, past or days away is refused', async () => {
+  for (const expires_at of [undefined, '', 'not-a-date', null, 12345, '2026-10-22T00:00:00Z', '2026-12-01T00:00:00Z']) {
+    const { demo } = make([reply(202, { job: 'j'.repeat(64) }), ready({ expires_at })]);
+    await demo.start('plain'); await demo.step();
+    assert.notEqual(demo.state.phase, 'ready', String(expires_at));
+    assert.equal(demo.state.creds, null, String(expires_at));
+  }
+});

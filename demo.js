@@ -1,4 +1,4 @@
-import { createDemo, PROFILES, FIRST_LOGIN, formatRemaining } from './demo-core.mjs';
+import { createDemo, PROFILES, FIRST_LOGIN, formatRemaining } from './demo-core.mjs?v=20261023-demo3';
 
 const root = document.querySelector('#demo');
 if (root) {
@@ -8,7 +8,7 @@ if (root) {
     form: $('#demo-form'), profiles: $('#demo-profiles'), start: $('#demo-start'), note: $('#demo-note'), status: $('#demo-status'),
     bar: $('#demo-bar'), barWrap: $('#demo-progress'), result: $('#demo-result'), resultTitle: $('#demo-result-title'), url: $('#demo-url'),
     user: $('#demo-user'), pass: $('#demo-pass'), toggle: $('#demo-toggle'), left: $('#demo-left'), steps: $('#demo-steps'),
-    meter: $('#demo-meter'), cells: $('#demo-cells'), active: $('#demo-active'), total: $('#demo-total'), again: $('#demo-again'),
+    until: $('#demo-until'), meter: $('#demo-meter'), cells: $('#demo-cells'), active: $('#demo-active'), total: $('#demo-total'), again: $('#demo-again'),
   };
 
   PROFILES.forEach((p, i) => {
@@ -86,9 +86,16 @@ if (root) {
       el.steps.replaceChildren();
       s.firstLogin.forEach(k => { const li = document.createElement('li'); li.textContent = FIRST_LOGIN[k]; el.steps.append(li); });
       el.steps.hidden = s.firstLogin.length === 0;
+      el.until.textContent = new Date(s.expiresAt).toLocaleString('pl-PL', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short' });
       startCountdown();
       if (!el.result.dataset.shown) { el.result.dataset.shown = '1'; el.resultTitle.focus(); }
-    } else { delete el.result.dataset.shown; revealed = false; el.toggle.setAttribute('aria-pressed', 'false'); el.toggle.textContent = 'Pokaż'; }
+    } else {
+      // whatever the reason, nothing of the access stays in the page: not hidden, gone
+      delete el.result.dataset.shown; revealed = false;
+      el.toggle.setAttribute('aria-pressed', 'false'); el.toggle.textContent = 'Pokaż';
+      el.url.textContent = ''; el.url.removeAttribute('href'); el.user.textContent = ''; el.pass.textContent = ''; delete el.pass.dataset.value;
+      el.left.textContent = '—'; el.until.textContent = '—'; el.steps.replaceChildren();
+    }
   }
 
   function armRate(at) {
@@ -98,7 +105,7 @@ if (root) {
 
   function startCountdown() {
     clearInterval(tick);
-    const draw = () => { el.left.textContent = formatRemaining(demo.remaining()); };
+    const draw = () => { if (!demo.expireIfDue()) el.left.textContent = formatRemaining(demo.remaining()); };
     draw();
     tick = setInterval(() => { if (demo.state.phase !== 'ready') clearInterval(tick); else draw(); }, 1000);
   }
@@ -127,7 +134,7 @@ if (root) {
     await demo.refreshStats();
     setTimeout(loopStats, document.hidden ? 60000 : 15000);
   }
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) demo.refreshStats(); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { demo.expireIfDue(); demo.refreshStats(); } });
 
   render(demo.state);
   if (api) {

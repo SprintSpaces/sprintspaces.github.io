@@ -115,11 +115,24 @@ export function createDemo({ api, fetch: doFetch, storage, now = () => Date.now(
     }
   }
 
+  // expireIfDue ends the demo by the clock: the moment the service named is the end of access, whether or not the network answers, the tab
+  // was asleep, or the service hangs. It clears the address, the login and the password from the state.
+  function expireIfDue() {
+    if (state.phase === 'ready' && state.expiresAt && now() >= state.expiresAt) {
+      forget();
+      set({ phase: 'ended', creds: null, firstLogin: [], progress: 100, message: 'Czas demo minął. Możesz uruchomić nowe.' });
+      return true;
+    }
+    return false;
+  }
+
   // step follows the demo once and says when to look again (milliseconds), or null when there is nothing more to wait for.
   async function step() {
+    if (expireIfDue()) return null;
     const mem = load();
     if (!api || !mem.job) return null;
     const r = await call('GET', '/v1/demos/' + encodeURIComponent(mem.job));
+    if (expireIfDue()) return null; // time may have passed while the request was out
     if (r.status === 0) { set({ phase: state.phase === 'ready' ? 'ready' : 'offline', message: 'Brak połączenia z usługą demo — próbuję ponownie.' }); return 5000; }
     if (r.status === 404) { forget(); set({ phase: 'ended', creds: null, message: 'To demo już nie istnieje. Możesz uruchomić nowe.' }); return null; }
     if (r.status !== 200 || !r.data) { set({ phase: state.phase === 'ready' ? 'ready' : 'error', message: 'Usługa demo ma chwilowy kłopot — próbuję ponownie.' }); return 8000; }
@@ -131,10 +144,15 @@ export function createDemo({ api, fetch: doFetch, storage, now = () => Date.now(
         set({ phase: 'error', message: 'Demo jest gotowe, ale odpowiedź usługi jest niepełna. Uruchom je ponownie.' });
         return null;
       }
-      const expiresAt = Date.parse(d.expires_at) || 0;
-      if (expiresAt && expiresAt <= now()) { forget(); set({ phase: 'ended', creds: null, message: 'Czas tego demo minął. Możesz uruchomić nowe.' }); return null; }
+      // access without a deadline is not shown: the service names the moment, and the page must be able to end it
+      const expiresAt = typeof d.expires_at === 'string' && d.expires_at ? Date.parse(d.expires_at) : NaN;
+      if (!Number.isFinite(expiresAt) || expiresAt > now() + 25 * 3600 * 1000) {
+        set({ phase: 'error', creds: null, message: 'Demo jest gotowe, ale usługa nie podała, kiedy się kończy. Uruchom je ponownie.' });
+        return null;
+      }
+      if (expiresAt <= now()) { forget(); set({ phase: 'ended', creds: null, message: 'Czas tego demo minął. Możesz uruchomić nowe.' }); return null; }
       set({ phase: 'ready', progress: 100, message: '', creds: { url, username: d.username, password: d.password }, expiresAt, firstLogin });
-      return expiresAt ? Math.max(1000, Math.min(30000, expiresAt - now())) : 30000;
+      return Math.max(1000, Math.min(30000, expiresAt - now()));
     }
     if (d.state === 'ended') {
       forget();
@@ -154,5 +172,5 @@ export function createDemo({ api, fetch: doFetch, storage, now = () => Date.now(
 
   function reset() { forget(); set({ phase: api ? 'idle' : 'unavailable', progress: 0, creds: null, expiresAt: 0, message: '', firstLogin: [] }); }
 
-  return { state, start, step, refreshStats, resume, reset, remaining: () => (state.expiresAt ? state.expiresAt - now() : 0) };
+  return { state, start, step, refreshStats, resume, reset, expireIfDue, remaining: () => (state.expiresAt ? state.expiresAt - now() : 0) };
 }
