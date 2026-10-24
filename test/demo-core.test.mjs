@@ -208,3 +208,22 @@ test('a ready answer needs a believable end: absent, empty, malformed, past or d
     assert.equal(demo.state.creds, null, String(expires_at));
   }
 });
+
+test('the graphical counter rejects impossible capacity and progress stays finite', async () => {
+ for (const stats of [
+  {active:-1,max:10,total_ready:1}, {active:2,max:1,total_ready:2},
+  {active:0,max:1000000,total_ready:0}, {active:0,max:10,total_ready:-1},
+ ]) {
+  const {demo}=make([reply(200,stats)]);await demo.refreshStats();assert.equal(demo.state.stats,null);
+ }
+ const {demo}=make([reply(202,{job:'j'.repeat(64)}),reply(200,{state:'starting',progress:'broken'})]);
+ await demo.start('plain');await demo.step();assert.ok(Number.isFinite(demo.state.progress));
+});
+
+test('an offline retry preserves the original profile as well as its idempotency key', async () => {
+ const {demo,f}=make(['down',reply(202,{job:'j'.repeat(64)})]);
+ await demo.start('strict');await demo.start('plain');
+ assert.equal(f.calls[1].body.profile,'strict');
+ assert.equal(demo.state.profile,'strict');
+ assert.equal(f.calls[0].body.key,f.calls[1].body.key);
+});

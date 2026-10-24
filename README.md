@@ -29,3 +29,12 @@ Do oglądania w przeglądarce bez usługi: `node tools/mock-demo-api.mjs` serwuj
 Możliwości potwierdzone w README i dokumentacji prywatnej aplikacji: Kanban/Scrum, projekty i etapy, oś czasu, kalendarz, akceptacje, kontrola dostępu, ewidencja czasu, raporty, Microsoft 365, Spinka/ElevenLabs, MCP i REST API.
 
 Migracja jest elementem przygotowywanego wdrożenia: Excel oraz Google Sheets po eksporcie i mapowaniu. Konfigurowalna synchronizacja dotyczy Excela na SharePoint/OneDrive. Nie obiecywać uniwersalnego konektora Google Sheets, niezweryfikowanej wydajności ani liczbowego minimum RAM/CPU.
+
+Po odbiorze rzeczywistego backendu ustaw publiczny adres przez
+`node tools/configure-demo.mjs https://PUBLICZNY-BACKEND`.
+Skrypt najpierw wymaga prawdziwego HTTP200 `/v1/stats`, poprawnej pojemności1..10
+oraz CORS dokładnie dla `https://sprintspaces.github.io`; dopiero potem zmienia
+meta w `index.html`. Testy skryptu używają atrap i nie uruchamiają dem.
+Strona wywołuje publiczne `POST /v1/demos`. Podpisany `/v1/hooks/demo` jest
+wyłącznie dla wywołań serwer–serwer; jego sekret nigdy nie trafia do HTML/JS.
+Sama kontrola stats/CORS nie zastępuje próby start→readiness→logowanie→expiry→cleanup.
