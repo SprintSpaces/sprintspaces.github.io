@@ -102,7 +102,7 @@ export function createDemo({ api, fetch: doFetch, storage, now = () => Date.now(
       case r.status === 503 && r.data && r.data.error === 'full':
         forget();
         await refreshStats();
-        return set({ phase: 'full', message: 'Wszystkie miejsca są teraz zajęte. Demo kończą się same po kilku godzinach — spróbuj za kilka minut.' });
+        return set({ phase: 'full', message: 'Wszystkie miejsca są teraz zajęte. Każde demo kończy się samo po 15 minutach — spróbuj za chwilę.' });
       case r.status === 429:
         forget();
         return set({ phase: 'rate', retryAt: now() + (r.retryAfter || 60) * 1000, message: 'Za dużo prób z tego adresu. Poczekaj chwilę i spróbuj ponownie.' });
