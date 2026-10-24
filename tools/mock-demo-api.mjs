@@ -20,7 +20,7 @@ http.createServer(async (req, res) => {
   if (url.pathname === '/__scenario') { scenario = url.searchParams.get('name') || 'normal'; polls = 0; readyAt = 0; return json(res, 200, { scenario }); }
   if (url.pathname === '/v1/stats') {
     if (scenario === 'offline') return res.destroy();
-    return json(res, 200, { active: scenario === 'full' ? 3 : active, max: 3, ttl_seconds: 900, total_ready: total, full: scenario === 'full' });
+    return json(res, 200, { active: scenario === 'full' ? 3 : active, max: 3, ttl_seconds: 900, expiry_policy: 'idle', idle_timeout_seconds: 900, total_ready: total, full: scenario === 'full' });
   }
   if (url.pathname === '/v1/demos' && req.method === 'POST') {
     if (scenario === 'offline') return res.destroy();
@@ -39,7 +39,7 @@ http.createServer(async (req, res) => {
     const left = scenario === 'expired' ? -1 : TTL - (Date.now() - readyAt) / 1000;
     if (left <= 0) return json(res, 200, { state: 'ended', progress: 100, profile: 'plain' });
     const url2 = scenario === 'badurl' ? 'https://evil.example/' : 'https://rzutki-pingwin.byst.re/';
-    return json(res, 200, { state: 'ready', progress: 100, url: url2, username: 'demo@demo-0123456789ab.demo.invalid', password: 'Ab3dEf6hJk9mNp2qRs5t', expires_at: new Date(Date.now() + left * 1000).toISOString(), profile: 'strict', first_login: ['change_password', 'enrol_2fa'] });
+    return json(res, 200, { state: 'ready', expiry_policy: 'idle', idle_timeout_seconds: 900, progress: 100, url: url2, username: 'demo@demo-0123456789ab.demo.invalid', password: 'Ab3dEf6hJk9mNp2qRs5t', expires_at: new Date(Date.now() + left * 1000).toISOString(), profile: 'plain', first_login: [] });
   }
   // the site itself
   let path = normalize(url.pathname).replace(/^(\.\.[/\\])+/, '');

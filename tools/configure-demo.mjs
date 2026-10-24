@@ -20,7 +20,7 @@ export async function configuredPage(html, raw, doFetch = fetch) {
   }
   const data = await response.json();
   if (!Number.isSafeInteger(data.active) || !Number.isSafeInteger(data.max) || !Number.isSafeInteger(data.total_ready)
-      || data.active < 0 || data.active > data.max || data.max !== 3 || data.ttl_seconds !== 900 || data.total_ready < 0) {
+      || data.active < 0 || data.active > data.max || data.max !== 3 || data.ttl_seconds !== 900 || data.expiry_policy !== 'idle' || data.idle_timeout_seconds !== 900 || data.total_ready < 0) {
     throw Error('Public Demo counters violate the capacity contract');
   }
   return html.replace(meta, `<meta name="demo-api" content="${api.origin}">`);
