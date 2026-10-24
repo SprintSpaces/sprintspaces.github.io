@@ -72,8 +72,10 @@ export function createDemo({ api, fetch: doFetch, storage, now = () => Date.now(
   async function refreshStats() {
     if (!api) return;
     const r = await call('GET', '/v1/stats');
-    if (r.status === 200 && r.data && Number.isInteger(r.data.active) && Number.isInteger(r.data.max)) {
-      set({ stats: { active: r.data.active, max: r.data.max, total: Number.isInteger(r.data.total_ready) ? r.data.total_ready : 0, full: !!r.data.full } });
+    if (r.status === 200 && r.data && Number.isSafeInteger(r.data.active) && Number.isSafeInteger(r.data.max)
+        && r.data.max >= 1 && r.data.max <= 10 && r.data.active >= 0 && r.data.active <= r.data.max
+        && Number.isSafeInteger(r.data.total_ready) && r.data.total_ready >= 0) {
+      set({ stats: { active: r.data.active, max: r.data.max, total: r.data.total_ready, full: r.data.active >= r.data.max } });
     }
   }
 
@@ -82,7 +84,10 @@ export function createDemo({ api, fetch: doFetch, storage, now = () => Date.now(
     if (!api) return;
     if (!PROFILES.some(p => p.id === profile)) profile = 'plain';
     let mem = load();
-    if (!mem.key || mem.ended) mem = { key: newKey(randomBytes) };
+    if (!mem.key || mem.ended) mem = { key: newKey(randomBytes), profile };
+    // An uncertain response may already have reserved this key. Retrying it
+    // must keep the sign-in policy the visitor originally selected, too.
+    if (PROFILES.some(p => p.id === mem.profile)) profile = mem.profile;
     mem.profile = profile;
     save(mem);
     set({ phase: 'starting', progress: 2, profile, message: '', creds: null, firstLogin: [] });

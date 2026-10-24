@@ -1,4 +1,4 @@
-import { createDemo, PROFILES, FIRST_LOGIN, formatRemaining } from './demo-core.mjs?v=20261023-demo3';
+import { createDemo, PROFILES, FIRST_LOGIN, formatRemaining } from './demo-core.mjs?v=20261024-demo4';
 
 const root = document.querySelector('#demo');
 if (root) {
@@ -61,7 +61,10 @@ if (root) {
     renderMeter(s);
     const busy = s.phase === 'starting';
     el.start.disabled = busy || s.phase === 'unavailable' || s.phase === 'ready' || (s.phase === 'rate' && s.retryAt > Date.now());
-    el.form.querySelectorAll('input[name="profile"]').forEach(i => { i.disabled = busy || s.phase === 'ready'; });
+    el.form.querySelectorAll('input[name="profile"]').forEach(i => {
+      i.disabled = busy || s.phase === 'ready';
+      if (busy || s.phase === 'ready') i.checked = i.value === s.profile;
+    });
     el.barWrap.hidden = !busy;
     el.bar.style.width = `${s.progress}%`;
     el.barWrap.setAttribute('aria-valuenow', String(s.progress));
