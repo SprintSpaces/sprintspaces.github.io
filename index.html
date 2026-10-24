@@ -20,7 +20,10 @@
   <link rel="apple-touch-icon" href="assets/logo-192.png">
   <link rel="preload" as="image" href="assets/screenshots/board.webp">
   <link rel="stylesheet" href="styles.css?v=20261021-copy2">
+  <meta name="demo-api" content="">
+  <link rel="stylesheet" href="demo.css?v=20261023-demo3">
   <script src="app.js?v=20261021-copy2" defer></script>
+  <script type="module" src="demo.js?v=20261024-demo4"></script>
 </head>
 <body>
 <a class="skip-link" href="#main">Przejdź do treści</a>
@@ -29,7 +32,7 @@
     <a class="wordmark" href="#" aria-label="SprintSpaces — strona główna"><img src="assets/logo.svg" width="34" height="34" alt=""><span>Sprint<strong>Spaces</strong></span></a>
     <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="navigation" aria-label="Otwórz menu"><span></span><span></span></button>
     <nav id="navigation" aria-label="Menu główne">
-      <a href="#mozliwosci">Możliwości</a><a href="#aplikacja">Zobacz aplikację</a><a href="#migracja">Migracja danych</a><a href="#wdrozenie">Wdrożenie</a>
+      <a href="#mozliwosci">Możliwości</a><a href="#aplikacja">Zobacz aplikację</a><a href="#migracja">Migracja danych</a><a href="#wdrozenie">Wdrożenie</a><a href="#demo">Demo</a>
       <a class="button button-small" href="#kontakt">Porozmawiajmy <span aria-hidden="true">↗</span></a>
     </nav>
   </div>
@@ -41,8 +44,8 @@
         <a class="pilot-pill" href="#wdrozenie"><span class="status-dot"></span> Darmowe wdrożenie testowe <span aria-hidden="true">→</span></a>
         <h1>Mniej arkuszy.<br><span>Więcej porządku.</span></h1>
         <p class="hero-lead">Prowadź projekty i obsługuj zgłoszenia w jednej aplikacji. Rozdzielaj zadania, ustalaj terminy i sprawdzaj postęp. Ustalenia z e-maili, pliki i czas pracy znajdziesz przy właściwej sprawie.</p>
-        <div class="hero-actions"><a class="button" href="#kontakt">Zapytaj o darmowy pilotaż <span aria-hidden="true">↗</span></a><a class="text-link" href="#aplikacja"><span class="play-icon" aria-hidden="true">▷</span> Zobacz aplikację</a></div>
-        <p class="hero-note">Zaczniemy od jednego procesu i danych z Twoich arkuszy.</p>
+        <div class="hero-actions"><a class="button" href="#demo">Uruchom własne demo <span aria-hidden="true">↗</span></a><a class="text-link" href="#kontakt">Zapytaj o darmowy pilotaż</a></div>
+        <p class="hero-note">Demo na fikcyjnych danych działa przez 15 minut. Pilotaż zespołu ustalimy osobno.</p>
         <div class="hero-points"><span><i aria-hidden="true">✓</i> Polski interfejs</span><span><i aria-hidden="true">✓</i> Własne statusy i pola</span><span><i aria-hidden="true">✓</i> Firmowe logowanie</span></div>
       </div>
       <div class="hero-product">
@@ -122,6 +125,39 @@
 
   <section class="container faq-section"><div><p class="eyebrow">DOBRZE WIEDZIEĆ</p><h2>Zanim zaczniemy.</h2></div><div class="faq-items"><details><summary>Czy musimy zmienić wszystkie procesy naraz?<span aria-hidden="true">+</span></summary><p>Możemy zacząć od jednego zespołu lub procesu. Przestrzenie mają własne statusy, pola i widoki, więc wdrożenie można dopasować do sposobu pracy konkretnego działu.</p></details><details><summary>Czy przeniesiecie dane z Excela i Arkuszy Google?<span aria-hidden="true">+</span></summary><p>Tak. Po analizie plików dopasujemy kolumny do pól aplikacji i przygotujemy automatyczny import. Dane z Arkuszy Google pobieramy z eksportu. Dla Excela w SharePoint lub OneDrive możliwa jest też dwukierunkowa synchronizacja wybranych danych. Ustalimy osobno, jak obsłużyć formuły i nietypowe układy arkuszy.</p></details><details><summary>Czy Spinka i własny agent są obowiązkowe?<span aria-hidden="true">+</span></summary><p>Nie. Z aplikacji można korzystać bez AI. Spinkę włącza administrator, a własnego agenta łączysz przez MCP. Zakres dostępu zatwierdzasz w SprintSpaces; uprawnienia do zmian danych trzeba włączyć osobno.</p></details><details><summary>Czy mogę połączyć SprintSpaces z innymi narzędziami?<span aria-hidden="true">+</span></summary><p>Tak. Poczta Microsoft 365 obsługuje zgłoszenia i odpowiedzi, MCP pozwala podłączyć własnego agenta AI, a API REST służy do budowania integracji i automatyzacji. Dla Excela w SharePoint lub OneDrive możemy skonfigurować synchronizację wybranych danych. Potrzebne połączenia ustalimy podczas wdrożenia.</p></details><details><summary>Czy to aplikacja tylko dla programistów?<span aria-hidden="true">+</span></summary><p>Nie. Można w niej prowadzić projekty, obsługiwać zgłoszenia IT, wnioski zakupowe i zadania administracyjne. Statusy, typy spraw i formularze dopasowujemy do pracy danego zespołu.</p></details><details><summary>Co obejmuje darmowe wdrożenie testowe?<span aria-hidden="true">+</span></summary><p>Przygotowanie przestrzeni, ustawienie wybranego procesu, migrację uzgodnionych danych i wprowadzenie zespołu. Przed rozpoczęciem potwierdzimy zakres i czas testu, warunki dalszego korzystania oraz ewentualne koszty hostingu i usług zewnętrznych.</p></details></div></section>
 
+  <section id="demo" class="section demo-section" aria-labelledby="demo-title">
+    <div class="container">
+      <div class="section-head"><div><p class="eyebrow">DEMO NA ŻYWO</p><h2 id="demo-title">Wypróbuj SprintSpaces<br>w osobnej instancji demo.</h2></div><p>Uruchomimy dla Ciebie własną kopię aplikacji z fikcyjnymi danymi: zgłoszenia, projekt z etapami, czas pracy. Działa 15 minut, a potem znika razem z danymi. Naraz mogą działać trzy takie instancje. Nie wpisuj tam prawdziwych informacji.</p></div>
+      <div class="demo-grid">
+        <div class="demo-panel">
+          <form id="demo-form" novalidate>
+            <fieldset><legend>Jak ma wyglądać pierwsze logowanie?</legend><div id="demo-profiles" class="demo-profiles"></div></fieldset>
+            <div class="demo-actions"><button id="demo-start" class="button" type="submit">Uruchom demo</button><button id="demo-again" class="text-link demo-again" type="button" hidden>Uruchom nowe demo</button></div>
+          </form>
+          <p id="demo-note" class="demo-note">Demo korzysta z darmowych adresów (byst.re, bieda.it, toadres.pl). Wiadomości e-mail z aplikacji nigdzie nie wychodzą.</p>
+          <div id="demo-status" class="demo-status" role="status" aria-live="polite"></div>
+          <div id="demo-progress" class="demo-progress" role="progressbar" aria-label="Postęp uruchamiania demo" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" hidden><div id="demo-bar"></div></div>
+          <div id="demo-result" class="demo-result" hidden>
+            <h3 id="demo-result-title" tabindex="-1">Twoje demo jest gotowe</h3>
+            <dl class="demo-creds">
+              <div><dt>Adres</dt><dd><a id="demo-url" href="#" target="_blank" rel="noopener noreferrer"></a></dd></div>
+              <div><dt>Login</dt><dd><code id="demo-user"></code> <button class="demo-mini" type="button" data-copy="user">Kopiuj</button></dd></div>
+              <div><dt>Hasło</dt><dd><code id="demo-pass" data-value=""></code> <button id="demo-toggle" class="demo-mini" type="button" aria-pressed="false">Pokaż</button> <button class="demo-mini" type="button" data-copy="pass">Kopiuj</button></dd></div>
+              <div><dt>Pozostało</dt><dd><span id="demo-left">—</span></dd></div>
+              <div><dt>Kończy się</dt><dd><time id="demo-until">—</time></dd></div>
+            </dl>
+            <ul id="demo-steps" class="demo-steps" hidden></ul>
+            <p class="demo-note">Hasło widzisz tylko tutaj i tylko dopóki demo działa. Odśwież stronę w tej karcie, aby je zobaczyć ponownie.</p>
+          </div>
+        </div>
+        <aside class="demo-side" aria-label="Stan puli demo">
+          <div id="demo-meter" class="demo-meter" role="img" aria-label="Licznik demo"><div id="demo-cells" class="demo-cells"></div></div>
+          <dl class="demo-counts"><div><dt>Aktywne demo</dt><dd id="demo-active">— / —</dd></div><div><dt>Uruchomiono łącznie</dt><dd id="demo-total">—</dd></div></dl>
+          <p class="demo-note">Liczby pochodzą z usługi demo, nie z tej strony. Jednocześnie działają najwyżej trzy demo. Każde przez 15 minut; start zależy od wolnych zasobów serwera.</p>
+        </aside>
+      </div>
+    </div>
+  </section>
   <section id="kontakt" class="section contact-section"><div class="container contact-grid"><div class="contact-copy"><p class="eyebrow">ZRÓBMY PIERWSZY KROK</p><h2>Porozmawiajmy o tym,<br><span>jak pracuje Twój zespół.</span></h2><p>Podczas 30-minutowej rozmowy omówimy Wasze potrzeby i wybierzemy zakres darmowego wdrożenia testowego. Napisz, czym zajmuje się zespół i co chcecie usprawnić.</p><div class="contact-person"><span class="person-avatar" aria-hidden="true">MM</span><div><strong>Michał Mleczko</strong><span>Twórca SprintSpaces</span></div></div><div class="contact-links"><a href="mailto:do@mleczki.pl">do@mleczki.pl <span aria-hidden="true">↗</span></a><a href="tel:+48732575375">+48 732 575 375 <span aria-hidden="true">↗</span></a></div><div class="contact-social"><a href="https://mleczakm.github.io/">Poznajmy się <span aria-hidden="true">↗</span></a><a href="https://linkedin.com/in/michal-mleczko/">LinkedIn <span aria-hidden="true">↗</span></a></div><div class="contact-tip"><span aria-hidden="true">↳</span><p>Pracujecie w arkuszach? Napisz, jakie dane w nich zbieracie i ile osób z nich korzysta. Na początek wystarczy kilka zdań.</p></div></div>
     <form id="contact-form" class="contact-form" action="https://formspree.io/f/xdavweok" method="POST">
       <h3>Porozmawiajmy o Twoim wdrożeniu</h3><p>Pola oznaczone <span aria-hidden="true">*</span> są wymagane.</p>
