@@ -44,7 +44,7 @@ export function formatRemaining(ms) {
 export function createDemo({ api, fetch: doFetch, storage, now = () => Date.now(), randomBytes, timeoutMs = 10000, hostPattern = HOSTS, onChange = () => {} }) {
   const state = {
     phase: api ? 'idle' : 'unavailable', // idle | starting | ready | ended | full | rate | offline | error | unavailable
-    progress: 0, stage: '', stats: null, creds: null, expiresAt: 0, profile: 'plain', firstLogin: [], retryAt: 0, message: '',
+    progress: 0, stage: '', dynamicExpiry: false, stats: null, creds: null, expiresAt: 0, profile: 'plain', firstLogin: [], retryAt: 0, message: '',
   };
   const emit = () => onChange({ ...state, stats: state.stats && { ...state.stats }, creds: state.creds && { ...state.creds } });
   const set = patch => { Object.assign(state, patch); emit(); };
@@ -102,7 +102,7 @@ export function createDemo({ api, fetch: doFetch, storage, now = () => Date.now(
       case r.status === 503 && r.data && r.data.error === 'full':
         forget();
         await refreshStats();
-        return set({ phase: 'full', message: 'Wszystkie miejsca są teraz zajęte. Każde demo kończy się samo po 15 minutach — spróbuj za chwilę.' });
+        return set({ phase: 'full', message: 'Wszystkie miejsca są teraz zajęte. Instancje są usuwane po 15 minutach bezczynności — spróbuj ponownie później.' });
       case r.status === 429:
         forget();
         return set({ phase: 'rate', retryAt: now() + (r.retryAfter || 60) * 1000, message: 'Za dużo prób z tego adresu. Poczekaj chwilę i spróbuj ponownie.' });
@@ -124,6 +124,10 @@ export function createDemo({ api, fetch: doFetch, storage, now = () => Date.now(
   // was asleep, or the service hangs. It clears the address, the login and the password from the state.
   function expireIfDue() {
     if (state.phase === 'ready' && state.expiresAt && now() >= state.expiresAt) {
+      if (state.dynamicExpiry) {
+        set({ phase: 'checking', creds: null, firstLogin: [], message: 'Sprawdzam aktywność instancji…' });
+        return false;
+      }
       forget();
       set({ phase: 'ended', creds: null, firstLogin: [], progress: 100, message: 'Czas demo minął. Możesz uruchomić nowe.' });
       return true;
@@ -138,9 +142,9 @@ export function createDemo({ api, fetch: doFetch, storage, now = () => Date.now(
     if (!api || !mem.job) return null;
     const r = await call('GET', '/v1/demos/' + encodeURIComponent(mem.job));
     if (expireIfDue()) return null; // time may have passed while the request was out
-    if (r.status === 0) { set({ phase: state.phase === 'ready' ? 'ready' : 'offline', message: 'Brak połączenia z usługą demo — próbuję ponownie.' }); return 5000; }
+    if (r.status === 0) { set({ phase: state.phase === 'ready' ? 'ready' : state.phase === 'checking' ? 'checking' : 'offline', message: 'Brak połączenia z usługą demo — próbuję ponownie.' }); return 5000; }
     if (r.status === 404) { forget(); set({ phase: 'ended', creds: null, message: 'To demo już nie istnieje. Możesz uruchomić nowe.' }); return null; }
-    if (r.status !== 200 || !r.data) { set({ phase: state.phase === 'ready' ? 'ready' : 'error', message: 'Usługa demo ma chwilowy kłopot — próbuję ponownie.' }); return 8000; }
+    if (r.status !== 200 || !r.data) { set({ phase: state.phase === 'ready' ? 'ready' : state.phase === 'checking' ? 'checking' : 'error', message: 'Usługa demo ma chwilowy kłopot — próbuję ponownie.' }); return 8000; }
     const d = r.data;
     const firstLogin = Array.isArray(d.first_login) ? d.first_login.filter(k => k in FIRST_LOGIN) : [];
     if (d.state === 'ready') {
@@ -156,8 +160,8 @@ export function createDemo({ api, fetch: doFetch, storage, now = () => Date.now(
         return null;
       }
       if (expiresAt <= now()) { forget(); set({ phase: 'ended', creds: null, message: 'Czas tego demo minął. Możesz uruchomić nowe.' }); return null; }
-      set({ phase: 'ready', progress: 100, message: '', creds: { url, username: d.username, password: d.password }, expiresAt, firstLogin });
-      return Math.max(1000, Math.min(30000, expiresAt - now()));
+      set({ phase: 'ready', progress: 100, message: '', creds: { url, username: d.username, password: d.password }, expiresAt, firstLogin, dynamicExpiry: d.expiry_policy === 'idle' });
+      return Math.max(1000, Math.min(state.dynamicExpiry ? 5000 : 30000, expiresAt - now()));
     }
     if (d.state === 'ended') {
       forget();
@@ -175,7 +179,7 @@ export function createDemo({ api, fetch: doFetch, storage, now = () => Date.now(
     return false;
   }
 
-  function reset() { forget(); set({ phase: api ? 'idle' : 'unavailable', progress: 0, stage: '', creds: null, expiresAt: 0, message: '', firstLogin: [] }); }
+  function reset() { forget(); set({ phase: api ? 'idle' : 'unavailable', progress: 0, stage: '', dynamicExpiry: false, creds: null, expiresAt: 0, message: '', firstLogin: [] }); }
 
   return { state, start, step, refreshStats, resume, reset, expireIfDue, remaining: () => (state.expiresAt ? state.expiresAt - now() : 0) };
 }

@@ -1,28 +1,15 @@
-import { createDemo, PROFILES, FIRST_LOGIN, formatRemaining } from './demo-core.mjs?v=20261024-demo4';
+import { createDemo, FIRST_LOGIN, formatRemaining } from './demo-core.mjs?v=20261024-idle1';
 
 const root = document.querySelector('#demo');
 if (root) {
   const $ = sel => root.querySelector(sel);
   const api = (document.querySelector('meta[name="demo-api"]')?.content || '').replace(/\/+$/, '');
   const el = {
-    form: $('#demo-form'), profiles: $('#demo-profiles'), start: $('#demo-start'), note: $('#demo-note'), status: $('#demo-status'),
+    form: $('#demo-form'), start: $('#demo-start'), note: $('#demo-note'), status: $('#demo-status'),
     bar: $('#demo-bar'), barWrap: $('#demo-progress'), result: $('#demo-result'), resultTitle: $('#demo-result-title'), url: $('#demo-url'),
     user: $('#demo-user'), pass: $('#demo-pass'), toggle: $('#demo-toggle'), left: $('#demo-left'), steps: $('#demo-steps'),
     until: $('#demo-until'), meter: $('#demo-meter'), cells: $('#demo-cells'), active: $('#demo-active'), total: $('#demo-total'), again: $('#demo-again'),
   };
-
-  PROFILES.forEach((p, i) => {
-    const label = document.createElement('label');
-    label.className = 'demo-profile';
-    const input = document.createElement('input');
-    input.type = 'radio'; input.name = 'profile'; input.value = p.id; input.checked = i === 0;
-    const body = document.createElement('span');
-    const t = document.createElement('strong'); t.textContent = p.label;
-    const d = document.createElement('small'); d.textContent = p.text;
-    body.append(t, d);
-    label.append(input, body);
-    el.profiles.append(label);
-  });
 
   const demo = createDemo({ api, fetch: window.fetch.bind(window), storage: window.sessionStorage, randomBytes: b => crypto.getRandomValues(b), onChange: render });
   let following = false, revealed = false, tick = 0, rateTimer = 0;
@@ -59,12 +46,8 @@ if (root) {
 
   function render(s) {
     renderMeter(s);
-    const busy = s.phase === 'starting';
+    const busy = s.phase === 'starting' || s.phase === 'checking';
     el.start.disabled = busy || s.phase === 'unavailable' || s.phase === 'ready' || (s.phase === 'rate' && s.retryAt > Date.now());
-    el.form.querySelectorAll('input[name="profile"]').forEach(i => {
-      i.disabled = busy || s.phase === 'ready';
-      if (busy || s.phase === 'ready') i.checked = i.value === s.profile;
-    });
     el.barWrap.hidden = !busy;
     el.bar.style.width = `${s.progress}%`;
     el.barWrap.setAttribute('aria-valuenow', String(s.progress));
@@ -75,6 +58,7 @@ if (root) {
       case 'idle': setStatus(''); break;
       case 'starting': setStatus(s.stage === 'waiting' ? 'Oczekiwanie na wolne zasoby serwera. Nie musisz odświeżać strony.' : `Przygotowuję demo… ${s.progress}%. Sprawdzam uruchomienie i adres HTTPS.`); break;
       case 'ready': setStatus('Demo jest gotowe.'); break;
+      case 'checking': setStatus('Sprawdzam, czy Twoja instancja jest nadal aktywna…'); break;
       case 'ended': setStatus(s.message || 'Czas demo minął.'); break;
       default: setStatus(s.message || 'Coś poszło nie tak. Spróbuj ponownie.');
     }
@@ -121,11 +105,10 @@ if (root) {
 
   el.form.addEventListener('submit', async event => {
     event.preventDefault();
-    const choice = el.form.querySelector('input[name="profile"]:checked')?.value || 'plain';
-    await demo.start(choice);
+    await demo.start('plain');
     if (demo.state.phase === 'starting') follow();
   });
-  el.again.addEventListener('click', () => { demo.reset(); el.form.querySelector('input[name="profile"]').focus(); });
+  el.again.addEventListener('click', () => { demo.reset(); el.start.focus(); });
 
   el.toggle.addEventListener('click', () => {
     revealed = !revealed;
