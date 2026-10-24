@@ -41,3 +41,7 @@
 @media(max-width:900px){.demo-grid{grid-template-columns:1fr}.demo-profiles{grid-template-columns:1fr}.demo-creds>div{grid-template-columns:80px 1fr}}
 @media(prefers-reduced-motion:reduce){.demo-progress>div{transition:none}}
 .demo-section [hidden]{display:none!important}
+
+.demo-intro { margin-bottom: 1.25rem; }
+.demo-intro h3 { margin: 0 0 .65rem; font-size: 1.1rem; }
+.demo-intro p { margin: .65rem 0; color: var(--muted, #586477); line-height: 1.65; }

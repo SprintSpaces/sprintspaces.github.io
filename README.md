@@ -19,9 +19,9 @@ Otwórz http://127.0.0.1:4173/. Strona nie wymaga kompilacji ani zależności. G
 
 ## Demo na żywo
 
-Sekcja „Wypróbuj” (`#demo`) rozmawia z usługą z repozytorium `SprintSpaces/Demo` (trzy punkty: `POST /v1/demos`, `GET /v1/demos/{job}`, `GET /v1/stats`). Adres usługi jest w `<meta name="demo-api" content="">` w `index.html`;
+Sekcja „Wypróbuj” nie wymaga wyboru sposobu logowania: nowe publiczne demo używa profilu plain, bez obowiązkowej zmiany hasła i2FA. Sekcja (`#demo`) rozmawia z usługą z repozytorium `SprintSpaces/Demo` (trzy punkty: `POST /v1/demos`, `GET /v1/demos/{job}`, `GET /v1/stats`). Adres usługi jest w `<meta name="demo-api" content="">` w `index.html`;
 **pusty = sekcja jest wyłączona** (komunikat „Demo jest chwilowo niedostępne”) i nic nie jest wysyłane. Ustaw go dopiero, gdy usługa działa i jej `DEMO_ALLOWED_ORIGINS` zawiera `https://sprintspaces.github.io`.
-Każda nowa instancja trwa15minut od gotowości; przy braku RAM może czekać na zasoby. Nie ma parametru zmieniającego adres usługi w locie. Licznik „aktywne N/3” i „uruchomiono łącznie” pochodzą z usługi. Logika jest w `demo-core.mjs` (testy: `node --test test/*.test.mjs`), widok w `demo.js`, wygląd w `demo.css`.
+Każda nowa instancja jest usuwana po15minutach bezczynności w aplikacji; przy braku RAM może czekać na zasoby. Nie ma parametru zmieniającego adres usługi w locie. Licznik „aktywne N/3” i „uruchomiono łącznie” pochodzą z usługi. Logika jest w `demo-core.mjs` (testy: `node --test test/*.test.mjs`), widok w `demo.js`, wygląd w `demo.css`.
 Do oglądania w przeglądarce bez usługi: `node tools/mock-demo-api.mjs` serwuje stronę z atrapą usługi i scenariuszami (`/__scenario?name=full|rate|offline|expired|badurl|normal`).
 
 ## Treści i weryfikacja
@@ -32,7 +32,7 @@ Migracja jest elementem przygotowywanego wdrożenia: Excel oraz Google Sheets po
 
 Po odbiorze rzeczywistego backendu ustaw publiczny adres przez
 `node tools/configure-demo.mjs https://PUBLICZNY-BACKEND`.
-Skrypt najpierw wymaga prawdziwego HTTP200 `/v1/stats`, limitu3 oraz ttl_seconds900
+Skrypt najpierw wymaga prawdziwego HTTP200 `/v1/stats`, limitu3, ttl_seconds900 oraz expiry_policy=idle/idle_timeout_seconds900
 oraz CORS dokładnie dla `https://sprintspaces.github.io`; dopiero potem zmienia
 meta w `index.html`. Testy skryptu używają atrap i nie uruchamiają dem.
 Strona wywołuje publiczne `POST /v1/demos`. Podpisany `/v1/hooks/demo` jest
