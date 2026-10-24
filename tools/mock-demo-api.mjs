@@ -1,7 +1,7 @@
 // A stand-in for the demo service, for looking at the section in a browser: it serves this site and answers the three endpoints.
 // The scenario is chosen with  GET /__scenario?name=normal|full|rate|offline|expired|badurl|slow   and the site's meta tag is pointed at this
 // server on the fly (the committed page has an empty address, so the section stays off until the real service address is set).
-//   node qa/mock-demo-api.mjs [port]
+//   node tools/mock-demo-api.mjs [port]
 import http from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
@@ -11,7 +11,7 @@ const root = fileURLToPath(new URL('..', import.meta.url));
 const port = Number(process.argv[2]) || 4180;
 const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.webp': 'image/webp', '.xml': 'text/xml', '.txt': 'text/plain' };
 const TTL = Number(process.env.MOCK_TTL) || 90;
-let scenario = 'normal', polls = 0, active = 3, total = 41, readyAt = 0;
+let scenario = 'normal', polls = 0, active = 0, total = 41, readyAt = 0;
 
 const json = (res, code, body, extra = {}) => { res.writeHead(code, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', ...extra }); res.end(JSON.stringify(body)); };
 
@@ -20,15 +20,15 @@ http.createServer(async (req, res) => {
   if (url.pathname === '/__scenario') { scenario = url.searchParams.get('name') || 'normal'; polls = 0; readyAt = 0; return json(res, 200, { scenario }); }
   if (url.pathname === '/v1/stats') {
     if (scenario === 'offline') return res.destroy();
-    return json(res, 200, { active: scenario === 'full' ? 10 : active, max: 10, total_ready: total, full: scenario === 'full' });
+    return json(res, 200, { active: scenario === 'full' ? 3 : active, max: 3, ttl_seconds: 900, total_ready: total, full: scenario === 'full' });
   }
   if (url.pathname === '/v1/demos' && req.method === 'POST') {
     if (scenario === 'offline') return res.destroy();
     let body = ''; for await (const c of req) body += c;
     const b = JSON.parse(body || '{}');
-    if (scenario === 'full') return json(res, 503, { error: 'full', active: 10, max: 10 });
+    if (scenario === 'full') return json(res, 503, { error: 'full', active: 3, max: 3 });
     if (scenario === 'rate') return json(res, 429, { error: 'rate_limited' }, { 'Retry-After': '5' });
-    polls = 0; readyAt = 0; active = Math.min(10, active + 1);
+    polls = 0; readyAt = 0; active = Math.min(3, active + 1);
     return json(res, 202, { job: 'j'.repeat(64), state: 'starting', _profile: b.profile });
   }
   if (url.pathname.startsWith('/v1/demos/')) {

@@ -45,7 +45,7 @@ if (root) {
   function renderMeter(s) {
     const st = s.stats;
     el.cells.replaceChildren();
-    const max = st ? st.max : 10;
+    const max = st ? st.max : 3;
     for (let i = 0; i < max; i++) {
       const c = document.createElement('span');
       c.className = 'demo-cell' + (st && i < st.active ? ' on' : '');
@@ -73,7 +73,7 @@ if (root) {
     switch (s.phase) {
       case 'unavailable': setStatus('Demo jest chwilowo niedostępne. Napisz do nas, a pokażemy aplikację na żywo.'); el.note.hidden = true; break;
       case 'idle': setStatus(''); break;
-      case 'starting': setStatus(`Przygotowuję demo… ${s.progress}%. Zwykle trwa to około minuty.`); break;
+      case 'starting': setStatus(s.stage === 'waiting' ? 'Oczekiwanie na wolne zasoby serwera. Nie musisz odświeżać strony.' : `Przygotowuję demo… ${s.progress}%. Sprawdzam uruchomienie i adres HTTPS.`); break;
       case 'ready': setStatus('Demo jest gotowe.'); break;
       case 'ended': setStatus(s.message || 'Czas demo minął.'); break;
       default: setStatus(s.message || 'Coś poszło nie tak. Spróbuj ponownie.');
@@ -103,7 +103,13 @@ if (root) {
 
   function armRate(at) {
     clearTimeout(rateTimer);
-    rateTimer = setTimeout(() => { el.start.disabled = false; setStatus('Możesz spróbować ponownie.'); }, Math.max(0, at - Date.now()));
+    const draw = () => {
+      const seconds = Math.max(0, Math.ceil((at - Date.now()) / 1000));
+      el.start.disabled = seconds > 0;
+      setStatus(seconds > 0 ? `Za dużo prób. Możesz spróbować ponownie za ${formatRemaining(seconds * 1000)}.` : 'Możesz spróbować ponownie.');
+      if (seconds > 0) rateTimer = setTimeout(draw, 1000);
+    };
+    draw();
   }
 
   function startCountdown() {
