@@ -34,7 +34,7 @@ function make(script, extra = {}) {
   const demo = createDemo({ api: API, fetch: f, storage, randomBytes: random, now: extra.now || (() => Date.parse('2026-10-23T12:00:00Z')), onChange: s => seen.push(s), ...extra.options });
   return { demo, storage, f, seen };
 }
-const ready = (extra = {}) => reply(200, { state: 'ready', progress: 100, url: 'https://rzutki-pingwin.byst.re/', username: 'demo@demo-1.demo.invalid', password: 'p'.repeat(20), expires_at: '2026-10-23T16:00:00Z', profile: 'plain', first_login: [], ...extra });
+const ready = (extra = {}) => reply(200, { state: 'ready', progress: 100, url: 'https://rzutki-pingwin.byst.re/', username: 'demo@demo-1.demo.invalid', password: 'p'.repeat(20), expires_at: '2026-10-23T12:15:00Z', profile: 'plain', first_login: [], ...extra });
 
 test('without a service address the section says it is unavailable and asks nothing', async () => {
   const f = service([]);
@@ -226,4 +226,13 @@ test('an offline retry preserves the original profile as well as its idempotency
  assert.equal(f.calls[1].body.profile,'strict');
  assert.equal(demo.state.profile,'strict');
  assert.equal(f.calls[0].body.key,f.calls[1].body.key);
+});
+
+
+test('a legacy four-hour backend cannot reveal access behind the fifteen-minute offer', async () => {
+  const { demo } = make([reply(202, { job: 'j'.repeat(64) }), ready({ expires_at: '2026-10-23T16:00:00Z' })]);
+  await demo.start('plain');
+  await demo.step();
+  assert.equal(demo.state.phase, 'error');
+  assert.equal(demo.state.creds, null);
 });

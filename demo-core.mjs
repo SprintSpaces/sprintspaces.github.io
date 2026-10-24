@@ -44,7 +44,7 @@ export function formatRemaining(ms) {
 export function createDemo({ api, fetch: doFetch, storage, now = () => Date.now(), randomBytes, timeoutMs = 10000, hostPattern = HOSTS, onChange = () => {} }) {
   const state = {
     phase: api ? 'idle' : 'unavailable', // idle | starting | ready | ended | full | rate | offline | error | unavailable
-    progress: 0, stats: null, creds: null, expiresAt: 0, profile: 'plain', firstLogin: [], retryAt: 0, message: '',
+    progress: 0, stage: '', stats: null, creds: null, expiresAt: 0, profile: 'plain', firstLogin: [], retryAt: 0, message: '',
   };
   const emit = () => onChange({ ...state, stats: state.stats && { ...state.stats }, creds: state.creds && { ...state.creds } });
   const set = patch => { Object.assign(state, patch); emit(); };
@@ -90,7 +90,7 @@ export function createDemo({ api, fetch: doFetch, storage, now = () => Date.now(
     if (PROFILES.some(p => p.id === mem.profile)) profile = mem.profile;
     mem.profile = profile;
     save(mem);
-    set({ phase: 'starting', progress: 2, profile, message: '', creds: null, firstLogin: [] });
+    set({ phase: 'starting', progress: 2, stage: '', profile, message: '', creds: null, firstLogin: [] });
     const r = await call('POST', '/v1/demos', { key: mem.key, profile });
     switch (true) {
       case r.status === 200 || r.status === 202: {
@@ -151,7 +151,7 @@ export function createDemo({ api, fetch: doFetch, storage, now = () => Date.now(
       }
       // access without a deadline is not shown: the service names the moment, and the page must be able to end it
       const expiresAt = typeof d.expires_at === 'string' && d.expires_at ? Date.parse(d.expires_at) : NaN;
-      if (!Number.isFinite(expiresAt) || expiresAt > now() + 25 * 3600 * 1000) {
+      if (!Number.isFinite(expiresAt) || expiresAt > now() + 16 * 60 * 1000) {
         set({ phase: 'error', creds: null, message: 'Demo jest gotowe, ale usługa nie podała, kiedy się kończy. Uruchom je ponownie.' });
         return null;
       }
@@ -164,7 +164,7 @@ export function createDemo({ api, fetch: doFetch, storage, now = () => Date.now(
       set({ phase: 'ended', creds: null, progress: 100, message: 'Czas demo minął. Możesz uruchomić nowe.' });
       return null;
     }
-    set({ phase: 'starting', progress: Math.min(95, Math.max(state.progress, Number(d.progress) || 0)), firstLogin });
+    set({ phase: 'starting', progress: Math.min(95, Math.max(state.progress, Number(d.progress) || 0)), stage: d.stage === 'waiting' ? 'waiting' : 'preparing', firstLogin });
     return state.progress < 20 ? 1500 : 2500;
   }
 
@@ -175,7 +175,7 @@ export function createDemo({ api, fetch: doFetch, storage, now = () => Date.now(
     return false;
   }
 
-  function reset() { forget(); set({ phase: api ? 'idle' : 'unavailable', progress: 0, creds: null, expiresAt: 0, message: '', firstLogin: [] }); }
+  function reset() { forget(); set({ phase: api ? 'idle' : 'unavailable', progress: 0, stage: '', creds: null, expiresAt: 0, message: '', firstLogin: [] }); }
 
   return { state, start, step, refreshStats, resume, reset, expireIfDue, remaining: () => (state.expiresAt ? state.expiresAt - now() : 0) };
 }
