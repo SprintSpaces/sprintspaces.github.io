@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { configuredPage } from '../tools/configure-demo.mjs';
 
 const html = '<meta name="demo-api" content="">';
-const answer = (status = 200, origin = 'https://sprintspaces.github.io', data = {active:0,max:3,total_ready:2,ttl_seconds:900}) => ({status,headers:{get:()=>origin},json:async()=>data});
+const answer = (status = 200, origin = 'https://sprintspaces.github.io', data = {active:0,max:3,total_ready:2,ttl_seconds:900,expiry_policy:'idle',idle_timeout_seconds:900}) => ({status,headers:{get:()=>origin},json:async()=>data});
 
 test('publication requires live counters and the exact site CORS origin', async () => {
   const calls=[];
@@ -12,7 +12,7 @@ test('publication requires live counters and the exact site CORS origin', async 
   assert.equal(calls[0][0],'https://demo.byst.re/v1/stats');
   assert.equal(calls[0][1].credentials,'omit');
   assert.equal(calls[0][1].headers.Origin,'https://sprintspaces.github.io');
-  for (const res of [answer(503),answer(200,'*'),answer(200,'https://other.example'),answer(200,undefined,{active:4,max:3,total_ready:2,ttl_seconds:900}),answer(200,undefined,{active:0,max:3,total_ready:2,ttl_seconds:14400}),answer(200,undefined,{active:0,max:10,total_ready:2,ttl_seconds:900})]) {
+  for (const res of [answer(503),answer(200,'*'),answer(200,'https://other.example'),answer(200,undefined,{active:4,max:3,total_ready:2,ttl_seconds:900,expiry_policy:'idle',idle_timeout_seconds:900}),answer(200,undefined,{active:0,max:3,total_ready:2,ttl_seconds:14400}),answer(200,undefined,{active:0,max:10,total_ready:2,ttl_seconds:900,expiry_policy:'idle',idle_timeout_seconds:900})]) {
     await assert.rejects(configuredPage(html,'https://demo.byst.re',async()=>res));
   }
 });
