@@ -5,7 +5,7 @@ import { launchView, LAUNCH_SECONDS, LAUNCH_TOLERANCE_SECONDS, LAUNCH_ESTIMATE }
 test('estimate uses the recorded real 34-second launch with a three-second tolerance', () => {
   assert.equal(LAUNCH_SECONDS, 34);
   assert.equal(LAUNCH_TOLERANCE_SECONDS, 3);
-  assert.equal(LAUNCH_ESTIMATE, 'Około 34 s (±3 s)');
+  assert.equal(LAUNCH_ESTIMATE, 'Około pół minuty');
   assert.equal(launchView(14000).remaining, 20);
 });
 
