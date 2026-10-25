@@ -66,3 +66,53 @@
 .pilot-ctas{display:flex;align-items:center;gap:24px;flex-wrap:wrap}
 .contact-tip a{color:var(--blue);font-weight:650;text-decoration:underline;text-underline-offset:3px}
 .pilot-ctas .text-link{font-size:12px}
+
+/* Launch estimate, a continuously moving fill, and fields that never wrap controls. */
+.demo-estimate{color:#c6d8fa;font-size:13px;margin-top:10px}
+.demo-loading{max-width:520px;margin-top:20px;padding:16px 18px;border:1px solid #ffffff30;border-radius:12px;background:#071d4740}
+.demo-loading-label{display:flex;justify-content:space-between;align-items:center;gap:16px;font-size:13px;font-weight:650}
+#demo-eta{flex-shrink:0;font-variant-numeric:tabular-nums;color:#b8f3db}
+.demo-progress{height:12px;margin-top:12px;position:relative;isolation:isolate}
+.demo-progress>div{position:relative;min-width:3%;border-radius:inherit;transition:width .3s linear;overflow:hidden;background:linear-gradient(90deg,#4bce97,#a9d7ff)}
+.demo-progress>div::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(110deg,transparent 0 12px,#ffffff65 12px 24px,transparent 24px 36px);background-size:72px 100%;animation:demo-progress-flow 1.4s linear infinite}
+@keyframes demo-progress-flow{to{background-position:72px 0}}
+#demo-loading-note{margin-top:10px;color:#c6d8fa;font-size:12px;line-height:1.5}
+.demo-result h3:focus{outline:none}
+.demo-result h3{font-size:21px;letter-spacing:-.025em;display:flex;align-items:center;gap:10px}
+.demo-result h3::before{content:"✓";display:grid;place-items:center;flex-shrink:0;width:28px;height:28px;background:#dcfce7;border-radius:50%;font-size:17px}
+.demo-creds>div{grid-template-columns:100px minmax(0,1fr);gap:12px}
+.demo-creds dd.demo-value-row{display:flex;align-items:center;gap:6px;min-width:0;flex-wrap:nowrap}
+.demo-value-row>a{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:15px}
+.demo-creds .demo-credential{box-sizing:border-box;display:block;min-width:0;width:0;flex:1;height:40px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#f7f9fc;color:var(--ink);font:13px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace;text-overflow:ellipsis}
+.demo-creds .demo-credential:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-color:var(--blue)}
+.demo-icon-button{box-sizing:border-box;flex:0 0 38px;width:38px;height:40px;display:inline-flex;align-items:center;justify-content:center;gap:0;border:1px solid var(--line);border-radius:8px;background:#fff;color:#526581;cursor:pointer;padding:0;transition:background .15s,color .15s,border-color .15s}
+.demo-icon-button svg{display:block;width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.demo-icon-button:hover{background:#eaf2ff;color:var(--blue);border-color:#a9c7f5}
+.demo-icon-button:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.demo-icon-button:disabled{opacity:.5;cursor:default}
+.demo-icon-button .icon-check,.demo-icon-button .icon-eye-off{display:none}
+.demo-icon-button.is-copied{color:#16815c;background:#edfcf5;border-color:#a8e9cd}
+.demo-icon-button.is-copied .icon-check{display:block}
+.demo-icon-button.is-copied .icon-copy{display:none}
+#demo-toggle[aria-pressed=true] .icon-eye{display:none}
+#demo-toggle[aria-pressed=true] .icon-eye-off{display:block}
+.demo-copy-feedback{font-size:12px;line-height:1.5;color:#16815c;min-height:0;margin:0}
+.demo-copy-feedback:not(:empty){margin-top:12px}
+/* Native dialog gives keyboard trapping, Escape, and a separate backdrop. */
+dialog.demo-ready-dialog{box-sizing:border-box;position:fixed;inset:0;margin:auto;width:440px;max-width:calc(100vw - 32px);max-height:calc(100dvh - 40px);padding:38px 32px 32px;border:1px solid #dce7f4;border-radius:24px;background:radial-gradient(ellipse at 50% 0,#e8f6ff,transparent 62%),#fff;color:#172b4d;text-align:center;box-shadow:0 32px 100px #04153b70;overflow:auto}
+.demo-ready-dialog::backdrop{background:#061a3c99;backdrop-filter:blur(8px)}
+.demo-ready-dialog[open]{animation:demo-dialog-in .3s cubic-bezier(.2,.9,.3,1)}
+@keyframes demo-dialog-in{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:none}}
+.demo-dialog-close{position:absolute;right:12px;top:12px;border:0;background:transparent;width:36px;height:36px}
+.demo-ready-art{position:relative;width:88px;height:88px;margin:0 auto 22px;border-radius:26px;background:linear-gradient(145deg,#0c66e4,#3746b9);box-shadow:0 12px 28px #0c66e436;transform:rotate(-6deg);display:grid;place-items:center}
+.demo-ready-art svg{width:52px;height:52px;stroke:#fff;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;fill:none;transform:rotate(6deg)}
+.demo-ready-art>span{position:absolute;border-radius:50%;background:#4bce97;width:13px;height:13px;top:-10px;right:-15px;box-shadow:0 0 0 5px #4bce9720}
+.demo-ready-art>span:nth-child(2){width:8px;height:8px;top:auto;right:auto;bottom:0;left:-18px;background:#9b8afb;box-shadow:none}
+.demo-ready-dialog .demo-ready-kicker{padding:0;background:none;color:#3365a4;font-size:10px;letter-spacing:.12em;font-weight:750;margin:0 0 10px}
+.demo-ready-dialog h2{font-size:32px;line-height:1.12;letter-spacing:-.04em;margin:0 0 14px;color:#172b4d}
+.demo-ready-dialog #demo-ready-description{background:none;padding:0;font-size:15px;color:#596c86;line-height:1.6;margin:0}
+.demo-ready-detail{font-size:12px;color:#526581;margin:18px 0 24px;display:flex;gap:8px;align-items:center;justify-content:center}
+.demo-ready-detail>span{color:#16815c;font-size:16px}
+.demo-ready-dialog>.button{width:100%;justify-content:space-between;border-radius:10px;padding:13px 16px;font-size:14px}
+@media(max-width:620px){.demo-creds>div{grid-template-columns:1fr;gap:5px}.demo-creds{gap:15px}.demo-credential{font-size:14px}.demo-icon-button{flex-basis:42px;width:42px;height:42px}.demo-creds .demo-credential{height:42px}.demo-loading{padding:14px}.demo-loading-label{font-size:12px;gap:8px}.demo-ready-dialog{padding:34px 22px 24px}.demo-ready-dialog h2{font-size:29px}}
+@media(prefers-reduced-motion:reduce){.demo-progress>div::after,.demo-ready-dialog[open]{animation:none}.demo-progress>div{transition:none}.demo-icon-button{transition:none}}
