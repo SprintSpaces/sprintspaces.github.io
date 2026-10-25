@@ -22,7 +22,7 @@ Otwórz http://127.0.0.1:4173/. Strona nie wymaga kompilacji ani zależności. G
 Sekcja „Wypróbuj” nie wymaga wyboru sposobu logowania: nowe publiczne demo używa profilu plain, bez obowiązkowej zmiany hasła i2FA. Sekcja (`#demo`) rozmawia z usługą z repozytorium `SprintSpaces/Demo` (trzy punkty: `POST /v1/demos`, `GET /v1/demos/{job}`, `GET /v1/stats`). Adres usługi jest w `<meta name="demo-api" content="">` w `index.html`;
 **pusty = sekcja jest wyłączona** (komunikat „Demo jest chwilowo niedostępne”) i nic nie jest wysyłane. Ustaw go dopiero, gdy usługa działa i jej `DEMO_ALLOWED_ORIGINS` zawiera `https://sprintspaces.github.io`.
 Każda nowa instancja jest usuwana po15minutach bezczynności w aplikacji; przy braku RAM może czekać na zasoby. Nie ma parametru zmieniającego adres usługi w locie. Licznik „aktywne N/3” i „uruchomiono łącznie” pochodzą z usługi. Logika jest w `demo-core.mjs` (testy: `node --test test/*.test.mjs`), widok w `demo.js`, wygląd w `demo.css`.
-Do oglądania w przeglądarce bez usługi: `node tools/mock-demo-api.mjs` serwuje stronę z atrapą usługi i scenariuszami (`/__scenario?name=full|rate|offline|expired|badurl|normal`).
+Do oglądania w przeglądarce bez usługi: `node tools/mock-demo-api.mjs` serwuje stronę z atrapą usługi i scenariuszami (`/__scenario?name=full|rate|offline|expired|badurl|normal|slow|waiting|failed`).
 
 ## Treści i weryfikacja
 
@@ -38,3 +38,30 @@ meta w `index.html`. Testy skryptu używają atrap i nie uruchamiają dem.
 Strona wywołuje publiczne `POST /v1/demos`. Podpisany `/v1/hooks/demo` jest
 wyłącznie dla wywołań serwer–serwer; jego sekret nigdy nie trafia do HTML/JS.
 Sama kontrola stats/CORS nie zastępuje próby start→readiness→logowanie→expiry→cleanup.
+
+
+## Oczekiwanie i gotowość dema
+
+`demo-launch.mjs` przechowuje stałą estymację **34 s (±3 s)**. Podstawa: rzeczywista
+instancja Mikrus z 25.10.2026, od created_at 18:54:10 UTC do ready_at 18:54:44 UTC.
+To pojedynczy pomiar przykładowy, a ±3 s jest tolerancją prezentacji, nie statystyczną
+obietnicą. Ponowna próba z 19:12 UTC zakończyła się błędem przydzielenia domeny,
+więc nie została użyta jako pomiar udanego startu.
+
+Pasek płynnie rośnie między odpowiedziami backendu i ma animowane pasy. Pozostaje
+poniżej 100% do rzeczywistego `ready`. Po przekroczeniu estymacji wyświetla
+informację o dłuższym przygotowaniu; kolejka zasobów nie obiecuje terminu startu.
+Nieudana instancja, która nigdy nie była gotowa, otrzymuje komunikat błędu startu.
+Okno gotowości pojawia się raz po ręcznym uruchomieniu, bez ponownego otwierania
+przy odświeżeniu strony lub okresowym sprawdzaniu stanu.
+
+Adres, login i hasło mają przyciski kopiowania; hasło jest domyślnie ukryte,
+a przycisk oka przełącza jego widoczność. Kopiowanie ma potwierdzenie i obsługę
+odmowy dostępu do schowka. Wygaszenie i ponowna kontrola terminu usuwają dane
+z pól oraz zamykają okno. Poświadczenia nie są zapisywane w storage ani kopiowane
+do okna powitalnego. Klawiatura, etykiety czytników ekranu i reduced-motion są
+obsługiwane. Mobilny układ zachowuje pola i ich przyciski w jednym wierszu.
+
+Weryfikacja: `node --test test/*.test.mjs`; lokalny mock pozwala sprawdzić
+normalny start, `slow` (przekroczenie estymacji), `waiting` (kolejka), `failed`
+(błąd przed gotowością), wygaszenie i błędy sieci bez tworzenia realnych instancji.

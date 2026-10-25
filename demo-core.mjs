@@ -160,12 +160,13 @@ export function createDemo({ api, fetch: doFetch, storage, now = () => Date.now(
         return null;
       }
       if (expiresAt <= now()) { forget(); set({ phase: 'ended', creds: null, message: 'Czas tego demo minął. Możesz uruchomić nowe.' }); return null; }
+      mem.wasReady = true; save(mem);
       set({ phase: 'ready', progress: 100, message: '', creds: { url, username: d.username, password: d.password }, expiresAt, firstLogin, dynamicExpiry: d.expiry_policy === 'idle' });
       return Math.max(1000, Math.min(state.dynamicExpiry ? 5000 : 30000, expiresAt - now()));
     }
     if (d.state === 'ended') {
       forget();
-      set({ phase: 'ended', creds: null, progress: 100, message: 'Czas demo minął. Możesz uruchomić nowe.' });
+      set({ phase: 'ended', creds: null, progress: mem.wasReady ? 100 : 0, message: mem.wasReady ? 'Czas demo minął. Możesz uruchomić nowe.' : 'Nie udało się przygotować demo. Spróbuj ponownie za chwilę.' });
       return null;
     }
     set({ phase: 'starting', progress: Math.min(95, Math.max(state.progress, Number(d.progress) || 0)), stage: d.stage === 'waiting' ? 'waiting' : 'preparing', firstLogin });
