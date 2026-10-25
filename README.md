@@ -65,3 +65,5 @@ obsługiwane. Mobilny układ zachowuje pola i ich przyciski w jednym wierszu.
 Weryfikacja: `node --test test/*.test.mjs`; lokalny mock pozwala sprawdzić
 normalny start, `slow` (przekroczenie estymacji), `waiting` (kolejka), `failed`
 (błąd przed gotowością), wygaszenie i błędy sieci bez tworzenia realnych instancji.
+
+Nowe dema korzystają z automatycznych adresów `wanda192-PORT.mikrus.cloud`. Backend nie rejestruje dla nich rekordów w panelu; po usunięciu instancji port jest trwale wycofany. Stary adres nie prowadzi do późniejszego demo. Frontend akceptuje ten schemat wyłącznie dla właściwej VM i poprawnego zakresu portów. Historyczne rekordy Cytrusa wymagają osobnego usunięcia; ta zmiana ich nie usuwa.

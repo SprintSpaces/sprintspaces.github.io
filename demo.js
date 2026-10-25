@@ -1,5 +1,5 @@
-import { createDemo, FIRST_LOGIN, formatRemaining } from './demo-core.mjs?v=20261025-launch1';
-import { launchView, LAUNCH_ESTIMATE } from './demo-launch.mjs?v=20261025-launch1';
+import { createDemo, FIRST_LOGIN, formatRemaining } from './demo-core.mjs?v=20261025-domains1';
+import { launchView, LAUNCH_ESTIMATE } from './demo-launch.mjs?v=20261025-domains1';
 
 const root = document.querySelector('#demo');
 if (root) {

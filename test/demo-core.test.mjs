@@ -257,3 +257,13 @@ test('a previously ready instance still reports expiry after a page refresh', as
   assert.match(resumed.demo.state.message, /Czas demo minął/);
   assert.equal(resumed.demo.state.creds, null);
 });
+
+
+test('automatic Mikrus domains are limited to the Demo VM and valid retired-port range', async () => {
+ assert.equal(safeDemoUrl('https://wanda192-20101.mikrus.cloud/'), 'https://wanda192-20101.mikrus.cloud/');
+ for (const url of ['https://other192-20101.mikrus.cloud/','https://wanda192-80.mikrus.cloud/','https://wanda192-65536.mikrus.cloud/','https://wanda192-20101.mikrus.cloud.evil.example/','http://wanda192-20101.mikrus.cloud/','https://user:pass@wanda192-20101.mikrus.cloud/']) assert.equal(safeDemoUrl(url),'');
+ const {demo}=make([reply(202,{job:'j'.repeat(64)}),ready({url:'https://wanda192-20101.mikrus.cloud/'})]);
+ await demo.start('plain'); await demo.step();
+ assert.equal(demo.state.phase,'ready');
+ assert.equal(demo.state.creds.url,'https://wanda192-20101.mikrus.cloud/');
+});
