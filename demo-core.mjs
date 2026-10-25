@@ -18,7 +18,7 @@ export const FIRST_LOGIN = {
 };
 
 const STORE_KEY = 'sprintspaces-demo';
-// the free names the demo service registers; a link to any other host is not shown as a link
+// Dedicated free names and the automatic route of the explicitly configured Demo VM.
 const HOSTS = /\.(byst\.re|bieda\.it|toadres\.pl)$/;
 
 export function newKey(randomBytes) {
@@ -30,7 +30,9 @@ export function newKey(randomBytes) {
 export function safeDemoUrl(raw, hostPattern = HOSTS) {
   try {
     const u = new URL(raw);
-    if (u.protocol !== 'https:' || u.username || u.password || u.port || !hostPattern.test(u.hostname)) return '';
+    const dynamic = hostPattern === HOSTS && /^wanda192-(\d{4,5})\.mikrus\.cloud$/.exec(u.hostname);
+    const dynamicAllowed = dynamic && Number(dynamic[1]) >= 1024 && Number(dynamic[1]) <= 65535;
+    if (u.protocol !== 'https:' || u.username || u.password || u.port || (!hostPattern.test(u.hostname) && !dynamicAllowed)) return '';
     return u.origin + '/';
   } catch { return ''; }
 }
