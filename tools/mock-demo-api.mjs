@@ -1,6 +1,6 @@
 // A stand-in for the demo service, for looking at the section in a browser: it serves this site and answers the three endpoints.
-// The scenario is chosen with  GET /__scenario?name=normal|full|rate|offline|expired|badurl|slow   and the site's meta tag is pointed at this
-// server on the fly (the committed page has an empty address, so the section stays off until the real service address is set).
+// The scenario is chosen with  GET /__scenario?name=normal|full|rate|offline|expired|badurl|slow|waiting|failed   and the site's meta tag is pointed at this
+// server on the fly; the committed page retains the real public service address.
 //   node tools/mock-demo-api.mjs [port]
 import http from 'node:http';
 import { readFile } from 'node:fs/promises';
@@ -16,7 +16,7 @@ let scenario = 'normal', polls = 0, active = 0, total = 41, readyAt = 0;
 const json = (res, code, body, extra = {}) => { res.writeHead(code, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', ...extra }); res.end(JSON.stringify(body)); };
 
 http.createServer(async (req, res) => {
-  const url = new URL(req.url, `http://localhost:${port}`);
+  const url = new URL(req.url, `http://127.0.0.1:${port}`);
   if (url.pathname === '/__scenario') { scenario = url.searchParams.get('name') || 'normal'; polls = 0; readyAt = 0; return json(res, 200, { scenario }); }
   if (url.pathname === '/v1/stats') {
     if (scenario === 'offline') return res.destroy();
@@ -34,6 +34,9 @@ http.createServer(async (req, res) => {
   if (url.pathname.startsWith('/v1/demos/')) {
     if (scenario === 'offline') return res.destroy();
     polls++;
+    if (scenario === 'failed') return json(res, 200, { state: 'ended' });
+    if (scenario === 'waiting') return json(res, 200, { state: 'starting', stage: 'waiting', progress: 5 });
+    if (scenario === 'slow' && polls < 24) return json(res, 200, { state: 'starting', progress: 50 });
     if (polls < 5) return json(res, 200, { state: 'starting', progress: 5 + polls * 18, profile: 'plain', first_login: [] });
     if (!readyAt) { readyAt = Date.now(); total++; }
     const left = scenario === 'expired' ? -1 : TTL - (Date.now() - readyAt) / 1000;
@@ -46,7 +49,7 @@ http.createServer(async (req, res) => {
   if (path.endsWith('/')) path += 'index.html';
   try {
     let data = await readFile(join(root, path));
-    if (path.endsWith('index.html')) data = Buffer.from(data.toString().replace(/<meta name="demo-api" content="[^"]*">/, `<meta name="demo-api" content="http://localhost:${port}">`));
+    if (path.endsWith('index.html')) data = Buffer.from(data.toString().replace(/<meta name="demo-api" content="[^"]*">/, `<meta name="demo-api" content="http://127.0.0.1:${port}">`));
     res.writeHead(200, { 'Content-Type': types[extname(path)] || 'application/octet-stream', 'Cache-Control': 'no-store' });
     res.end(data);
   } catch { res.writeHead(404); res.end('not found'); }
