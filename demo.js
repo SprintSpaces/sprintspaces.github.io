@@ -1,3 +1,4 @@
+import { connectDemoTabs } from './demo-tabs.mjs?v=20261025-tabs1';
 import { createDemo, FIRST_LOGIN, formatRemaining } from './demo-core.mjs?v=20261025-domains1';
 import { launchView, LAUNCH_ESTIMATE } from './demo-launch.mjs?v=20261025-domains1';
 
@@ -18,6 +19,10 @@ if (root) {
   const copyLabels = { url: 'adres dema', user: 'login', pass: 'hasło' };
   const copyTimers = new Map();
   const demo = createDemo({ api, fetch: window.fetch.bind(window), storage: window.sessionStorage, randomBytes: b => crypto.getRandomValues(b), onChange: render });
+  let channel = null;
+  try { if (typeof BroadcastChannel === 'function') channel = new BroadcastChannel('sprintspaces-demo-jobs'); } catch { /* restricted browsers keep the single-tab flow */ }
+  const tabs = connectDemoTabs({ storage: window.sessionStorage, channel });
+  let recovering = false;
   let following = false, revealed = false, tick = 0, rateTimer = 0;
   let launchTimer = 0, launchedAt = null, displayedProgress = 0, celebrateOnReady = false, waitingForResources = false;
 
@@ -76,7 +81,7 @@ if (root) {
   function render(s) {
     renderMeter(s);
     const busy = s.phase === 'starting' || s.phase === 'checking';
-    el.start.disabled = busy || s.phase === 'unavailable' || s.phase === 'ready' || (s.phase === 'rate' && s.retryAt > Date.now());
+    el.start.disabled = recovering || busy || s.phase === 'unavailable' || s.phase === 'ready' || (s.phase === 'rate' && s.retryAt > Date.now());
     el.loading.hidden = s.phase !== 'starting';
     el.estimate.hidden = s.phase === 'ready' || s.phase === 'unavailable';
     el.estimate.textContent = `${LAUNCH_ESTIMATE} na przygotowanie Twojej instancji.`;
@@ -152,9 +157,19 @@ if (root) {
     tick = setInterval(() => { if (demo.state.phase !== 'ready') clearInterval(tick); else draw(); }, 1000);
   }
 
+  async function resumeAcrossTabs() {
+    if (demo.resume()) { follow(); return true; }
+    recovering = true; render(demo.state);
+    const recovered = await tabs.recover();
+    recovering = false;
+    if (recovered && demo.resume()) { follow(); return true; }
+    render(demo.state); return false;
+  }
+
   el.form.addEventListener('submit', async event => {
     event.preventDefault();
-    if (demo.state.phase === 'starting' || demo.state.phase === 'checking' || demo.state.phase === 'ready') return;
+    if (recovering || demo.state.phase === 'starting' || demo.state.phase === 'checking' || demo.state.phase === 'ready') return;
+    if (await resumeAcrossTabs()) return;
     launchedAt = performance.now(); displayedProgress = 0; waitingForResources = false; celebrateOnReady = true;
     await demo.start('plain');
     if (demo.state.phase === 'starting') follow();
@@ -205,6 +220,6 @@ if (root) {
   render(demo.state);
   if (api) {
     loopStats();
-    if (demo.resume()) follow();
+    resumeAcrossTabs();
   }
 }

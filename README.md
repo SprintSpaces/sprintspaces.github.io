@@ -67,3 +67,5 @@ normalny start, `slow` (przekroczenie estymacji), `waiting` (kolejka), `failed`
 (błąd przed gotowością), wygaszenie i błędy sieci bez tworzenia realnych instancji.
 
 Nowe dema korzystają z automatycznych adresów `wanda192-PORT.mikrus.cloud`. Backend nie rejestruje dla nich rekordów w panelu; po usunięciu instancji port jest trwale wycofany. Stary adres nie prowadzi do późniejszego demo. Frontend akceptuje ten schemat wyłącznie dla właściwej VM i poprawnego zakresu portów. Historyczne rekordy Cytrusa wymagają osobnego usunięcia; ta zmiana ich nie usuwa.
+
+Otwarte karty tej samej przeglądarki mogą odzyskać prywatny job przez BroadcastChannel przed nowym POST. Token pozostaje w sessionStorage każdej karty; hasło/login/URL nie są przesyłane kanałem ani zapisywane w localStorage. Gdy żadna karta nie ma tokenu, ograniczenie IP pozostaje i nie ujawnia dostępu innym osobom za tym samym adresem.
