@@ -62,7 +62,7 @@ if (root) {
       case 'ended': setStatus(s.message || 'Czas demo minął.'); break;
       default: setStatus(s.message || 'Coś poszło nie tak. Spróbuj ponownie.');
     }
-    el.start.textContent = s.phase === 'ready' ? 'Demo działa' : (s.phase === 'full' || s.phase === 'offline' || s.phase === 'error' ? 'Spróbuj ponownie' : 'Uruchom demo');
+    el.start.textContent = s.phase === 'ready' ? 'Demo działa' : (s.phase === 'full' || s.phase === 'offline' || s.phase === 'error' ? 'Spróbuj ponownie' : 'Uruchom darmowe demo');
     if (s.phase === 'rate') armRate(s.retryAt);
     if (s.phase === 'ready' && s.creds) {
       el.url.textContent = s.creds.url.replace(/^https:\/\//, '').replace(/\/$/, '');
