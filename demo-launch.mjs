@@ -2,7 +2,7 @@
 // This is an estimate, not a deadline. Readiness always comes from the service.
 export const LAUNCH_SECONDS = 34;
 export const LAUNCH_TOLERANCE_SECONDS = 3;
-export const LAUNCH_ESTIMATE = `Około ${LAUNCH_SECONDS} s (±${LAUNCH_TOLERANCE_SECONDS} s)`;
+export const LAUNCH_ESTIMATE = 'Około pół minuty';
 
 export function launchView(elapsedMs, backendProgress = 0, waiting = false) {
   const elapsed = Math.max(0, Number(elapsedMs) || 0) / 1000;
