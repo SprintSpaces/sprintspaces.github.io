@@ -236,3 +236,24 @@ test('a legacy four-hour backend cannot reveal access behind the fifteen-minute 
   assert.equal(demo.state.phase, 'error');
   assert.equal(demo.state.creds, null);
 });
+
+test('an instance that fails before readiness is a startup failure, not an expired successful demo', async () => {
+  const { demo } = make([reply(202, { job: 'j'.repeat(64) }), reply(200, { state: 'ended' })]);
+  await demo.start('plain');
+  await demo.step();
+  assert.equal(demo.state.phase, 'ended');
+  assert.equal(demo.state.progress, 0);
+  assert.match(demo.state.message, /Nie udało się przygotować/);
+  assert.equal(demo.state.creds, null);
+});
+
+test('a previously ready instance still reports expiry after a page refresh', async () => {
+  const { demo, storage } = make([reply(202, { job: 'j'.repeat(64) }), ready()]);
+  await demo.start('plain'); await demo.step();
+  const resumed = make([reply(200, { state: 'ended' })], { storage });
+  assert.equal(resumed.demo.resume(), true);
+  await resumed.demo.step();
+  assert.equal(resumed.demo.state.progress, 100);
+  assert.match(resumed.demo.state.message, /Czas demo minął/);
+  assert.equal(resumed.demo.state.creds, null);
+});
