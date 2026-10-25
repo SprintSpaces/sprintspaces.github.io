@@ -46,7 +46,7 @@ http.createServer(async (req, res) => {
   if (path.endsWith('/')) path += 'index.html';
   try {
     let data = await readFile(join(root, path));
-    if (path.endsWith('index.html')) data = Buffer.from(data.toString().replace('<meta name="demo-api" content="">', `<meta name="demo-api" content="http://localhost:${port}">`));
+    if (path.endsWith('index.html')) data = Buffer.from(data.toString().replace(/<meta name="demo-api" content="[^"]*">/, `<meta name="demo-api" content="http://localhost:${port}">`));
     res.writeHead(200, { 'Content-Type': types[extname(path)] || 'application/octet-stream', 'Cache-Control': 'no-store' });
     res.end(data);
   } catch { res.writeHead(404); res.end('not found'); }
