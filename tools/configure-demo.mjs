@@ -26,13 +26,23 @@ export async function configuredPage(html, raw, doFetch = fetch) {
   return html.replace(meta, `<meta name="demo-api" content="${api.origin}">`);
 }
 
+export async function configuredPages(pages, raw, doFetch = fetch) {
+  const meta = /<meta name="demo-api" content="[^"]*">/g;
+  if (!pages.length || pages.some(html => [...html.matchAll(meta)].length !== 1)) {
+    throw Error('Every language page must contain exactly one demo-api meta element');
+  }
+  const first = await configuredPage(pages[0], raw, doFetch);
+  const configuredMeta = first.match(meta)[0];
+  return pages.map(html => html.replace(meta, configuredMeta));
+}
+
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
     if (process.argv.length !== 3) throw Error('Usage: node tools/configure-demo.mjs https://PUBLIC-DEMO-API');
-    const page = new URL('../index.html', import.meta.url);
-    const html = await readFile(page, 'utf8');
-    const next = await configuredPage(html, process.argv[2]);
-    await writeFile(page, next);
-    console.log('Configured the public Demo endpoint after live stats/CORS checks. Review and publish the page; real launch/cleanup acceptance is still required.');
+    const pages = ['../index.html', '../en/index.html'].map(file => new URL(file, import.meta.url));
+    const html = await Promise.all(pages.map(page => readFile(page, 'utf8')));
+    const next = await configuredPages(html, process.argv[2]);
+    for (let i = 0; i < pages.length; i++) await writeFile(pages[i], next[i]);
+    console.log('Configured the public Demo endpoint in both languages after live stats/CORS checks. Review and publish the pages; real launch/cleanup acceptance is still required.');
   } catch (e) { console.error(e.message); process.exitCode = 1; }
 }

@@ -1,9 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { configuredPage } from '../tools/configure-demo.mjs';
+import { configuredPage, configuredPages } from '../tools/configure-demo.mjs';
 
 const html = '<meta name="demo-api" content="">';
 const answer = (status = 200, origin = 'https://sprintspaces.github.io', data = {active:0,max:3,total_ready:2,ttl_seconds:900,expiry_policy:'idle',idle_timeout_seconds:900}) => ({status,headers:{get:()=>origin},json:async()=>data});
+
+test('both language pages receive the verified API origin with one live check', async () => {
+  let calls = 0;
+  const pages = [html, '<html lang="en">' + html + '</html>'];
+  const result = await configuredPages(pages, 'https://demo.byst.re/', async () => { calls++; return answer(); });
+  assert.equal(calls, 1);
+  result.forEach(page => assert.ok(page.includes('content="https://demo.byst.re"')));
+  await assert.rejects(configuredPages([html, '<html></html>'], 'https://demo.byst.re', async () => { calls++; return answer(); }));
+  assert.equal(calls, 1, 'validate every locale before contacting the service');
+});
 
 test('publication requires live counters and the exact site CORS origin', async () => {
   const calls=[];

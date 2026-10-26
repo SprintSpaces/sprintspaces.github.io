@@ -1,5 +1,9 @@
+import { createTranslator } from './i18n.mjs?v=20261026-i18n1';
+const locale = document.documentElement.lang;
+const t = createTranslator(locale);
+
 import { connectDemoTabs } from './demo-tabs.mjs?v=20261025-tabs1';
-import { createDemo, FIRST_LOGIN, formatRemaining } from './demo-core.mjs?v=20261025-domains1';
+import { createDemo, FIRST_LOGIN, formatRemaining } from './demo-core.mjs?v=20261026-i18n1';
 import { launchView, LAUNCH_ESTIMATE } from './demo-launch.mjs?v=20261025-domains1';
 
 const root = document.querySelector('#demo');
@@ -16,9 +20,9 @@ if (root) {
     feedback: $('#demo-copy-feedback'), dialog: $('#demo-ready-dialog'), close: $('#demo-ready-close'), continue: $('#demo-ready-continue'),
   };
   const copies = [...root.querySelectorAll('[data-copy]')];
-  const copyLabels = { url: 'adres dema', user: 'login', pass: 'hasło' };
+  const copyLabels = { url: t('adres dema'), user: t('login'), pass: t('hasło') };
   const copyTimers = new Map();
-  const demo = createDemo({ api, fetch: window.fetch.bind(window), storage: window.sessionStorage, randomBytes: b => crypto.getRandomValues(b), onChange: render });
+  const demo = createDemo({ api, locale, fetch: window.fetch.bind(window), storage: window.sessionStorage, randomBytes: b => crypto.getRandomValues(b), onChange: render });
   let channel = null;
   try { if (typeof BroadcastChannel === 'function') channel = new BroadcastChannel('sprintspaces-demo-jobs'); } catch { /* restricted browsers keep the single-tab flow */ }
   const tabs = connectDemoTabs({ storage: window.sessionStorage, channel });
@@ -44,8 +48,8 @@ if (root) {
     revealed = show;
     el.pass.type = show ? 'text' : 'password';
     el.toggle.setAttribute('aria-pressed', String(show));
-    el.toggle.setAttribute('aria-label', show ? 'Ukryj hasło' : 'Pokaż hasło');
-    el.toggle.title = show ? 'Ukryj hasło' : 'Pokaż hasło';
+    el.toggle.setAttribute('aria-label', show ? t('Ukryj hasło') : t('Pokaż hasło'));
+    el.toggle.title = show ? t('Ukryj hasło') : t('Pokaż hasło');
   }
 
   function drawLaunch() {
@@ -57,10 +61,10 @@ if (root) {
     displayedProgress = Math.max(displayedProgress, view.progress);
     el.bar.style.width = `${displayedProgress.toFixed(1)}%`;
     el.barWrap.setAttribute('aria-valuenow', String(Math.round(displayedProgress)));
-    el.barWrap.setAttribute('aria-valuetext', view.waiting ? 'Oczekiwanie na zasoby serwera' : view.delayed ? 'Końcowa weryfikacja uruchomienia' : `Szacowany postęp ${Math.round(displayedProgress)}%. Pozostało około ${view.remaining} sekund.`);
-    el.stage.textContent = view.waiting ? 'Czekamy na wolne zasoby' : view.delayed ? 'Jeszcze chwila…' : 'Przygotowujemy Twoją przestrzeń';
-    el.eta.textContent = view.waiting ? 'W kolejce' : view.delayed ? 'Weryfikujemy' : view.remaining > 0 ? `Jeszcze około ${view.remaining} s` : 'Za chwilę';
-    el.loadingNote.textContent = view.waiting ? `Gdy zwolnią się zasoby, przygotowanie zajmuje zwykle ${LAUNCH_ESTIMATE.toLowerCase()}.` : view.delayed ? 'Uruchomienie trwa dłużej niż zwykle. Czekamy na potwierdzenie aplikacji i adresu HTTPS.' : 'Uruchamiamy aplikację z przykładowymi danymi i sprawdzamy adres HTTPS.';
+    el.barWrap.setAttribute('aria-valuetext', view.waiting ? t('Oczekiwanie na zasoby serwera') : view.delayed ? t('Końcowa weryfikacja uruchomienia') : t('Szacowany postęp {progress}%. Pozostało około {seconds} sekund.', { progress: Math.round(displayedProgress), seconds: view.remaining }));
+    el.stage.textContent = view.waiting ? t('Czekamy na wolne zasoby') : view.delayed ? t('Jeszcze chwila…') : t('Przygotowujemy Twoją przestrzeń');
+    el.eta.textContent = view.waiting ? t('W kolejce') : view.delayed ? t('Weryfikujemy') : view.remaining > 0 ? t('Jeszcze około {seconds} s', { seconds: view.remaining }) : t('Za chwilę');
+    el.loadingNote.textContent = view.waiting ? t('Gdy zwolnią się zasoby, przygotowanie zajmuje zwykle {estimate}.', { estimate: t(LAUNCH_ESTIMATE).toLowerCase() }) : view.delayed ? t('Uruchomienie trwa dłużej niż zwykle. Czekamy na potwierdzenie aplikacji i adresu HTTPS.') : t('Uruchamiamy aplikację z przykładowymi danymi i sprawdzamy adres HTTPS.');
   }
 
   function renderMeter(s) {
@@ -75,7 +79,7 @@ if (root) {
     }
     el.active.textContent = st ? `${st.active} / ${st.max}` : '— / —';
     el.total.textContent = st ? String(st.total) : '—';
-    el.meter.setAttribute('aria-label', st ? `Aktywne demo: ${st.active} z ${st.max}. Uruchomiono łącznie: ${st.total}.` : 'Licznik demo jest chwilowo niedostępny.');
+    el.meter.setAttribute('aria-label', st ? t('Aktywne demo: {active} z {max}. Uruchomiono łącznie: {total}.', st) : t('Licznik demo jest chwilowo niedostępny.'));
   }
 
   function render(s) {
@@ -84,7 +88,7 @@ if (root) {
     el.start.disabled = recovering || busy || s.phase === 'unavailable' || s.phase === 'ready' || (s.phase === 'rate' && s.retryAt > Date.now());
     el.loading.hidden = s.phase !== 'starting';
     el.estimate.hidden = s.phase === 'ready' || s.phase === 'unavailable';
-    el.estimate.textContent = `${LAUNCH_ESTIMATE} na przygotowanie Twojej instancji.`;
+    el.estimate.textContent = t('{estimate} na przygotowanie Twojej instancji.', { estimate: t(LAUNCH_ESTIMATE) });
     if (s.phase === 'starting') {
       if (launchedAt === null) launchedAt = performance.now();
       if (!launchTimer) launchTimer = setInterval(drawLaunch, 250);
@@ -98,15 +102,15 @@ if (root) {
     el.result.hidden = s.phase !== 'ready';
     el.again.hidden = s.phase !== 'ended';
     switch (s.phase) {
-      case 'unavailable': setStatus('Demo jest chwilowo niedostępne. Napisz do nas, a pokażemy aplikację na żywo.'); el.note.hidden = true; break;
+      case 'unavailable': setStatus(t('Demo jest chwilowo niedostępne. Napisz do nas, a pokażemy aplikację na żywo.')); el.note.hidden = true; break;
       case 'idle': setStatus(''); break;
-      case 'starting': setStatus('Przygotowujemy Twoje demo.'); break;
-      case 'ready': setStatus('Demo jest gotowe.'); break;
-      case 'checking': setStatus('Sprawdzam, czy Twoja instancja jest nadal aktywna…'); break;
-      case 'ended': setStatus(s.message || 'Czas demo minął.'); break;
-      default: setStatus(s.message || 'Coś poszło nie tak. Spróbuj ponownie.');
+      case 'starting': setStatus(t('Przygotowujemy Twoje demo.')); break;
+      case 'ready': setStatus(t('Demo jest gotowe.')); break;
+      case 'checking': setStatus(t('Sprawdzam, czy Twoja instancja jest nadal aktywna…')); break;
+      case 'ended': setStatus(s.message || t('Czas demo minął.')); break;
+      default: setStatus(s.message || t('Coś poszło nie tak. Spróbuj ponownie.'));
     }
-    el.start.textContent = s.phase === 'ready' ? 'Demo działa' : (s.phase === 'full' || s.phase === 'offline' || s.phase === 'error' ? 'Spróbuj ponownie' : 'Uruchom darmowe demo');
+    el.start.textContent = s.phase === 'ready' ? t('Demo działa') : (s.phase === 'full' || s.phase === 'offline' || s.phase === 'error' ? t('Spróbuj ponownie') : t('Uruchom darmowe demo'));
     if (s.phase === 'rate') armRate(s.retryAt);
     if (s.phase === 'ready' && s.creds) {
       el.url.textContent = s.creds.url.replace(/^https:\/\//, '').replace(/\/$/, '');
@@ -115,9 +119,9 @@ if (root) {
       if (el.pass.value !== s.creds.password) el.pass.value = s.creds.password;
       copies.forEach(button => { button.disabled = false; }); el.toggle.disabled = false;
       el.steps.replaceChildren();
-      s.firstLogin.forEach(k => { const li = document.createElement('li'); li.textContent = FIRST_LOGIN[k]; el.steps.append(li); });
+      s.firstLogin.forEach(k => { const li = document.createElement('li'); li.textContent = t(FIRST_LOGIN[k]); el.steps.append(li); });
       el.steps.hidden = s.firstLogin.length === 0;
-      el.until.textContent = new Date(s.expiresAt).toLocaleString('pl-PL', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short' });
+      el.until.textContent = new Date(s.expiresAt).toLocaleString(locale === 'en' ? 'en-GB' : 'pl-PL', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short' });
       startCountdown();
       if (celebrateOnReady) {
         celebrateOnReady = false;
@@ -132,7 +136,7 @@ if (root) {
       el.left.textContent = '—'; el.until.textContent = '—'; el.steps.replaceChildren(); el.feedback.textContent = '';
       copies.forEach(button => {
         button.disabled = true; button.classList.remove('is-copied');
-        button.setAttribute('aria-label', `Kopiuj ${copyLabels[button.dataset.copy]}`);
+        button.setAttribute('aria-label', t('Kopiuj {item}', { item: copyLabels[button.dataset.copy] }));
         clearTimeout(copyTimers.get(button));
       });
       el.toggle.disabled = true;
@@ -144,7 +148,7 @@ if (root) {
     const draw = () => {
       const seconds = Math.max(0, Math.ceil((at - Date.now()) / 1000));
       el.start.disabled = seconds > 0;
-      setStatus(seconds > 0 ? `Za dużo prób. Możesz spróbować ponownie za ${formatRemaining(seconds * 1000)}.` : 'Możesz spróbować ponownie.');
+      setStatus(seconds > 0 ? t('Za dużo prób. Możesz spróbować ponownie za {time}.', { time: formatRemaining(seconds * 1000) }) : t('Możesz spróbować ponownie.'));
       if (seconds > 0) rateTimer = setTimeout(draw, 1000);
     };
     draw();
@@ -188,12 +192,12 @@ if (root) {
     try {
       await navigator.clipboard.writeText(source);
       if (demo.state.phase !== 'ready') return;
-      button.classList.add('is-copied'); button.setAttribute('aria-label', `Skopiowano ${copyLabels[kind]}`);
-      el.feedback.textContent = `Skopiowano ${copyLabels[kind]}.`;
+      button.classList.add('is-copied'); button.setAttribute('aria-label', t('Skopiowano {item}', { item: copyLabels[kind] }));
+      el.feedback.textContent = t('Skopiowano {item}.', { item: copyLabels[kind] });
       clearTimeout(copyTimers.get(button));
-      copyTimers.set(button, setTimeout(() => { button.classList.remove('is-copied'); button.setAttribute('aria-label', `Kopiuj ${copyLabels[kind]}`); }, 2000));
+      copyTimers.set(button, setTimeout(() => { button.classList.remove('is-copied'); button.setAttribute('aria-label', t('Kopiuj {item}', { item: copyLabels[kind] })); }, 2000));
     } catch {
-      el.feedback.textContent = 'Nie udało się skopiować. Zaznacz dane i skopiuj je ręcznie.';
+      el.feedback.textContent = t('Nie udało się skopiować. Zaznacz dane i skopiuj je ręcznie.');
     }
   }));
 

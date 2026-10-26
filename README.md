@@ -10,6 +10,44 @@ python3 -m http.server 4173 --bind 127.0.0.1
 
 Otwórz http://127.0.0.1:4173/. Strona nie wymaga kompilacji ani zależności. GitHub Pages publikuje katalog główny gałęzi `main`.
 
+## Wersje językowe (PL / EN)
+
+Polska strona zachowuje dotychczasowy adres `/`, a angielska jest dostępna pod
+`/en/`. Obie mają pełną treść w HTML, własny canonical i wzajemne odnośniki
+`hreflang` (`pl`, `en`, `x-default`). Sitemap zawiera oba adresy. Nie przekierowujemy
+automatycznie na podstawie języka przeglądarki: wybór jest zawsze dostępny w nagłówku,
+także bez JavaScript. Przy włączonym JS przełącznik zachowuje aktualną sekcję.
+
+Źródłem wspólnego układu są polskie pliki `index.html`, `prywatnosc.html` i
+`brand/index.html`. Tłumaczenia znajdują się w `locales/en.json`, z polską treścią
+jako kluczem. Po zmianie treści lub układu uruchom:
+
+```sh
+python3 tools/build-locales.py
+python3 tools/build-locales.py --check
+python3 -m unittest discover -s test -p '*_test.py'
+node --test test/*.test.mjs
+```
+
+Generator używa wyłącznie biblioteki standardowej Pythona. Tworzy `en/index.html`,
+`en/privacy.html`, `en/brand/index.html` i `locales/runtime-en.mjs`. Te pliki są
+wersjonowane i nie należy edytować ich ręcznie. Brak tłumaczenia przerywa generowanie;
+CI sprawdza, czy wygenerowane pliki są aktualne i czy linki lokalne są poprawne.
+GitHub Pages nadal serwuje gotowe pliki bez etapu budowania na serwerze.
+
+Teksty interaktywne używają `t('Polska treść')` z `i18n.mjs`; argumenty dynamiczne
+mają postać `{seconds}` i są przekazywane jako drugi argument. Generator wybiera
+te dosłowne klucze do niewielkiego słownika runtime. Stałe pierwszego logowania
+i estymacji dema są uwzględniane osobno. Język pochodzi z `html lang`.
+Demo korzysta ze wspólnego storage dla obu ścieżek, więc zmiana języka nie tworzy
+nowej instancji. `tools/configure-demo.mjs` aktualizuje adres API w obu wersjach.
+
+Angielska strona ma własny obraz udostępniania `assets/social-card-en.png`
+(źródło wektorowe: `assets/social-card-en.svg`). Zrzuty aplikacji pozostają
+oryginalnymi zrzutami polskiego interfejsu, co opisują angielskie podpisy.
+Prywatność i materiały marki zachowują dotychczasowe `noindex`; pełna techniczna
+specyfikacja marki w Markdown pozostaje po polsku i jest odpowiednio oznaczona.
+
 ## Zawartość
 
 - `index.html`, `styles.css`, `app.js`: responsywna strona, galeria sześciu widoków, powiększanie, kontakt.
@@ -34,7 +72,7 @@ Po odbiorze rzeczywistego backendu ustaw publiczny adres przez
 `node tools/configure-demo.mjs https://PUBLICZNY-BACKEND`.
 Skrypt najpierw wymaga prawdziwego HTTP200 `/v1/stats`, limitu3, ttl_seconds900 oraz expiry_policy=idle/idle_timeout_seconds900
 oraz CORS dokładnie dla `https://sprintspaces.github.io`; dopiero potem zmienia
-meta w `index.html`. Testy skryptu używają atrap i nie uruchamiają dem.
+meta w `index.html` oraz `en/index.html`. Testy skryptu używają atrap i nie uruchamiają dem.
 Strona wywołuje publiczne `POST /v1/demos`. Podpisany `/v1/hooks/demo` jest
 wyłącznie dla wywołań serwer–serwer; jego sekret nigdy nie trafia do HTML/JS.
 Sama kontrola stats/CORS nie zastępuje próby start→readiness→logowanie→expiry→cleanup.
