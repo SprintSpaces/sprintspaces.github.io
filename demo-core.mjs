@@ -1,3 +1,5 @@
+import { createTranslator } from './i18n.mjs?v=20261026-i18n1';
+
 // The logic of the "Wypróbuj" section, without the page: what is asked of the demo service, what the answers mean, what is remembered.
 // It is a module so that it can be tested without a browser (test/demo-core.test.mjs).
 //
@@ -43,7 +45,8 @@ export function formatRemaining(ms) {
   return h > 0 ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}` : `${m}:${String(s).padStart(2, '0')}`;
 }
 
-export function createDemo({ api, fetch: doFetch, storage, now = () => Date.now(), randomBytes, timeoutMs = 10000, hostPattern = HOSTS, onChange = () => {} }) {
+export function createDemo({ api, fetch: doFetch, storage, now = () => Date.now(), randomBytes, timeoutMs = 10000, hostPattern = HOSTS, onChange = () => {}, locale = 'pl' }) {
+  const t = createTranslator(locale);
   const state = {
     phase: api ? 'idle' : 'unavailable', // idle | starting | ready | ended | full | rate | offline | error | unavailable
     progress: 0, stage: '', dynamicExpiry: false, stats: null, creds: null, expiresAt: 0, profile: 'plain', firstLogin: [], retryAt: 0, message: '',
@@ -96,7 +99,7 @@ export function createDemo({ api, fetch: doFetch, storage, now = () => Date.now(
     const r = await call('POST', '/v1/demos', { key: mem.key, profile });
     switch (true) {
       case r.status === 200 || r.status === 202: {
-        if (!r.data || typeof r.data.job !== 'string') return set({ phase: 'error', message: 'Usługa odpowiedziała niezrozumiale. Spróbuj ponownie.' });
+        if (!r.data || typeof r.data.job !== 'string') return set({ phase: 'error', message: t('Usługa odpowiedziała niezrozumiale. Spróbuj ponownie.') });
         mem.job = r.data.job;
         save(mem);
         return;
@@ -104,21 +107,21 @@ export function createDemo({ api, fetch: doFetch, storage, now = () => Date.now(
       case r.status === 503 && r.data && r.data.error === 'full':
         forget();
         await refreshStats();
-        return set({ phase: 'full', message: 'Wszystkie miejsca są teraz zajęte. Instancje są usuwane po 15 minutach bezczynności — spróbuj ponownie później.' });
+        return set({ phase: 'full', message: t('Wszystkie miejsca są teraz zajęte. Instancje są usuwane po 15 minutach bezczynności — spróbuj ponownie później.') });
       case r.status === 429:
         forget();
-        return set({ phase: 'rate', retryAt: now() + (r.retryAfter || 60) * 1000, message: 'Za dużo prób z tego adresu. Poczekaj chwilę i spróbuj ponownie.' });
+        return set({ phase: 'rate', retryAt: now() + (r.retryAfter || 60) * 1000, message: t('Za dużo prób z tego adresu. Poczekaj chwilę i spróbuj ponownie.') });
       case r.status === 409:
         if (mem.job) return; // this tab already has one: keep following it
         forget();
-        return set({ phase: 'error', message: 'Z tego adresu działa już demo. Wróć do karty, w której je uruchomiono, albo poczekaj, aż się skończy.' });
+        return set({ phase: 'error', message: t('Z tego adresu działa już demo. Wróć do karty, w której je uruchomiono, albo poczekaj, aż się skończy.') });
       case r.status === 400:
         forget();
-        return set({ phase: 'error', message: 'Nie udało się przyjąć prośby. Odśwież stronę i spróbuj ponownie.' });
+        return set({ phase: 'error', message: t('Nie udało się przyjąć prośby. Odśwież stronę i spróbuj ponownie.') });
       case r.status === 0:
-        return set({ phase: 'offline', message: 'Brak połączenia z usługą demo. Sprawdź sieć i spróbuj ponownie.' });
+        return set({ phase: 'offline', message: t('Brak połączenia z usługą demo. Sprawdź sieć i spróbuj ponownie.') });
       default:
-        return set({ phase: 'error', message: 'Usługa demo ma chwilowy kłopot. Spróbuj ponownie za chwilę.' });
+        return set({ phase: 'error', message: t('Usługa demo ma chwilowy kłopot. Spróbuj ponownie za chwilę.') });
     }
   }
 
@@ -127,11 +130,11 @@ export function createDemo({ api, fetch: doFetch, storage, now = () => Date.now(
   function expireIfDue() {
     if (state.phase === 'ready' && state.expiresAt && now() >= state.expiresAt) {
       if (state.dynamicExpiry) {
-        set({ phase: 'checking', creds: null, firstLogin: [], message: 'Sprawdzam aktywność instancji…' });
+        set({ phase: 'checking', creds: null, firstLogin: [], message: t('Sprawdzam aktywność instancji…') });
         return false;
       }
       forget();
-      set({ phase: 'ended', creds: null, firstLogin: [], progress: 100, message: 'Czas demo minął. Możesz uruchomić nowe.' });
+      set({ phase: 'ended', creds: null, firstLogin: [], progress: 100, message: t('Czas demo minął. Możesz uruchomić nowe.') });
       return true;
     }
     return false;
@@ -144,31 +147,31 @@ export function createDemo({ api, fetch: doFetch, storage, now = () => Date.now(
     if (!api || !mem.job) return null;
     const r = await call('GET', '/v1/demos/' + encodeURIComponent(mem.job));
     if (expireIfDue()) return null; // time may have passed while the request was out
-    if (r.status === 0) { set({ phase: state.phase === 'ready' ? 'ready' : state.phase === 'checking' ? 'checking' : 'offline', message: 'Brak połączenia z usługą demo — próbuję ponownie.' }); return 5000; }
-    if (r.status === 404) { forget(); set({ phase: 'ended', creds: null, message: 'To demo już nie istnieje. Możesz uruchomić nowe.' }); return null; }
-    if (r.status !== 200 || !r.data) { set({ phase: state.phase === 'ready' ? 'ready' : state.phase === 'checking' ? 'checking' : 'error', message: 'Usługa demo ma chwilowy kłopot — próbuję ponownie.' }); return 8000; }
+    if (r.status === 0) { set({ phase: state.phase === 'ready' ? 'ready' : state.phase === 'checking' ? 'checking' : 'offline', message: t('Brak połączenia z usługą demo — próbuję ponownie.') }); return 5000; }
+    if (r.status === 404) { forget(); set({ phase: 'ended', creds: null, message: t('To demo już nie istnieje. Możesz uruchomić nowe.') }); return null; }
+    if (r.status !== 200 || !r.data) { set({ phase: state.phase === 'ready' ? 'ready' : state.phase === 'checking' ? 'checking' : 'error', message: t('Usługa demo ma chwilowy kłopot — próbuję ponownie.') }); return 8000; }
     const d = r.data;
     const firstLogin = Array.isArray(d.first_login) ? d.first_login.filter(k => k in FIRST_LOGIN) : [];
     if (d.state === 'ready') {
       const url = safeDemoUrl(d.url, hostPattern);
       if (!url || typeof d.username !== 'string' || typeof d.password !== 'string') {
-        set({ phase: 'error', message: 'Demo jest gotowe, ale odpowiedź usługi jest niepełna. Uruchom je ponownie.' });
+        set({ phase: 'error', message: t('Demo jest gotowe, ale odpowiedź usługi jest niepełna. Uruchom je ponownie.') });
         return null;
       }
       // access without a deadline is not shown: the service names the moment, and the page must be able to end it
       const expiresAt = typeof d.expires_at === 'string' && d.expires_at ? Date.parse(d.expires_at) : NaN;
       if (!Number.isFinite(expiresAt) || expiresAt > now() + 16 * 60 * 1000) {
-        set({ phase: 'error', creds: null, message: 'Demo jest gotowe, ale usługa nie podała, kiedy się kończy. Uruchom je ponownie.' });
+        set({ phase: 'error', creds: null, message: t('Demo jest gotowe, ale usługa nie podała, kiedy się kończy. Uruchom je ponownie.') });
         return null;
       }
-      if (expiresAt <= now()) { forget(); set({ phase: 'ended', creds: null, message: 'Czas tego demo minął. Możesz uruchomić nowe.' }); return null; }
+      if (expiresAt <= now()) { forget(); set({ phase: 'ended', creds: null, message: t('Czas tego demo minął. Możesz uruchomić nowe.') }); return null; }
       mem.wasReady = true; save(mem);
       set({ phase: 'ready', progress: 100, message: '', creds: { url, username: d.username, password: d.password }, expiresAt, firstLogin, dynamicExpiry: d.expiry_policy === 'idle' });
       return Math.max(1000, Math.min(state.dynamicExpiry ? 5000 : 30000, expiresAt - now()));
     }
     if (d.state === 'ended') {
       forget();
-      set({ phase: 'ended', creds: null, progress: mem.wasReady ? 100 : 0, message: mem.wasReady ? 'Czas demo minął. Możesz uruchomić nowe.' : 'Nie udało się przygotować demo. Spróbuj ponownie za chwilę.' });
+      set({ phase: 'ended', creds: null, progress: mem.wasReady ? 100 : 0, message: mem.wasReady ? t('Czas demo minął. Możesz uruchomić nowe.') : t('Nie udało się przygotować demo. Spróbuj ponownie za chwilę.') });
       return null;
     }
     set({ phase: 'starting', progress: Math.min(95, Math.max(state.progress, Number(d.progress) || 0)), stage: d.stage === 'waiting' ? 'waiting' : 'preparing', firstLogin });

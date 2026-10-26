@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#f0f5ff"/>
+  <rect x="720" width="480" height="630" fill="#0c66e4"/>
+  <g font-family="Arial, Helvetica, sans-serif">
+    <rect x="70" y="55" width="52" height="52" rx="16" fill="#0c66e4"/>
+    <path d="M85 73h23M85 81h23M85 89h15" stroke="white" stroke-width="4" stroke-linecap="round"/>
+    <text x="138" y="91" font-size="34" fill="#172b4d">Sprint<tspan font-weight="700">Spaces</tspan></text>
+    <text x="68" y="245" font-size="64" font-weight="700" letter-spacing="-2" fill="#172b4d">Fewer spreadsheets.</text>
+    <text x="68" y="325" font-size="72" font-weight="700" letter-spacing="-2" fill="#0c66e4">More clarity.</text>
+    <text x="72" y="393" font-size="23" fill="#626f86">Projects, tasks and requests in one workspace.</text>
+    <rect x="72" y="454" width="290" height="56" rx="8" fill="#0c66e4"/>
+    <text x="96" y="490" font-size="23" font-weight="700" fill="white">Launch a free demo →</text>
+    <text x="72" y="570" font-size="18" fill="#626f86">sprintspaces.github.io/en/</text>
+  </g>
+  <rect x="776" y="160" width="370" height="300" rx="26" fill="#ffffff" fill-opacity=".12"/>
+  <rect x="878" y="220" width="166" height="166" rx="48" fill="white"/>
+  <path d="M925 277h72M925 303h72M925 329h42" stroke="#0c66e4" stroke-width="12" stroke-linecap="round"/>
+</svg>

@@ -1,29 +1,30 @@
-'use strict';
+import { createTranslator } from './i18n.mjs?v=20261026-i18n1';
+const t = createTranslator(document.documentElement.lang);
 
 const menu = document.querySelector('.menu-toggle');
 const navigation = document.querySelector('#navigation');
 function closeMenu() {
   if (!menu || !navigation) return;
   menu.setAttribute('aria-expanded', 'false');
-  menu.setAttribute('aria-label', 'Otwórz menu');
+  menu.setAttribute('aria-label', t('Otwórz menu'));
   delete navigation.dataset.open;
 }
 menu?.addEventListener('click', () => {
   const expanded = menu.getAttribute('aria-expanded') !== 'true';
   menu.setAttribute('aria-expanded', String(expanded));
-  menu.setAttribute('aria-label', expanded ? 'Zamknij menu' : 'Otwórz menu');
+  menu.setAttribute('aria-label', expanded ? t('Zamknij menu') : t('Otwórz menu'));
   navigation.dataset.open = String(expanded);
 });
 navigation?.querySelectorAll('a').forEach(link => link.addEventListener('click', closeMenu));
 document.addEventListener('keydown', event => { if (event.key === 'Escape') closeMenu(); });
 
 const views = {
-  board: ['TABLICA ZESPOŁU', 'Kto pracuje nad czym i na jakim jest etapie?', 'Na tablicy zobaczysz zadania, przypisane osoby, priorytety i terminy. Filtruj widok według potrzeb i zmieniaj status zadań, przesuwając karty.', 'Tablica Kanban z zadaniami, statusami, osobami i terminami.'],
-  projects: ['PROJEKTY I ETAPY', 'Od planu projektu do zadań poszczególnych osób.', 'Podziel pracę na etapy, przypisz zadania i sprawdzaj postęp. Przy danych przeniesionych z Excela możesz zachować odnośnik do arkusza i komórki źródłowej.', 'Projekt z etapami, zadaniami, statusami, osobami i odnośnikami do źródła Excel.'],
-  ticket: ['SZCZEGÓŁY ZADANIA', 'Ustalenia, pliki i historia przy jednej sprawie.', 'Przeczytaj opis i rozmowę, sprawdź załączniki oraz wcześniejsze decyzje. Z tego samego widoku zmienisz dostępne pola, dodasz komentarz i zapiszesz czas pracy.', 'Karta zadania SprintSpaces z opisem, komentarzami, szczegółami i panelem czasu pracy.'],
-  timeline: ['PLAN I TERMINY', 'Zobacz, kiedy zaczynają się i kończą zadania.', 'Oś czasu pokazuje zapisane daty rozpoczęcia, wysyłki i zakończenia. Zmień skalę z tygodniowej na miesięczną lub zawęź widok do wybranej osoby, typu zadania czy sprintu.', 'Oś czasu projektu z terminami etapów i zadań.'],
-  time: ['EWIDENCJA CZASU', 'Sprawdź, na co poświęcasz czas w ciągu tygodnia.', 'Dodawaj i poprawiaj wpisy w kalendarzu lub korzystaj z pomiaru czasu przy zadaniu. Gotową kartę tygodnia możesz wysłać do zatwierdzenia, a dane wyeksportować do CSV.', 'Kalendarz ewidencji czasu pracy z wpisami przypisanymi do zadań.'],
-  reports: ['POSTĘP I OBCIĄŻENIE', 'Sprawdź, co jest gotowe i co wymaga uwagi.', 'Zobacz statusy zadań, zaległe terminy, obciążenie osób i zapisany czas pracy. W osobnym module raportów ustawisz też cykliczną wysyłkę e-mailem i opcjonalne podsumowanie AI.', 'Raport projektu ze statusami, obciążeniem osób, zaległościami i czasem pracy.']
+  board: [t('TABLICA ZESPOŁU'), t('Kto pracuje nad czym i na jakim jest etapie?'), t('Na tablicy zobaczysz zadania, przypisane osoby, priorytety i terminy. Filtruj widok według potrzeb i zmieniaj status zadań, przesuwając karty.'), t('Tablica Kanban z zadaniami, statusami, osobami i terminami.')],
+  projects: [t('PROJEKTY I ETAPY'), t('Od planu projektu do zadań poszczególnych osób.'), t('Podziel pracę na etapy, przypisz zadania i sprawdzaj postęp. Przy danych przeniesionych z Excela możesz zachować odnośnik do arkusza i komórki źródłowej.'), t('Projekt z etapami, zadaniami, statusami, osobami i odnośnikami do źródła Excel.')],
+  ticket: [t('SZCZEGÓŁY ZADANIA'), t('Ustalenia, pliki i historia przy jednej sprawie.'), t('Przeczytaj opis i rozmowę, sprawdź załączniki oraz wcześniejsze decyzje. Z tego samego widoku zmienisz dostępne pola, dodasz komentarz i zapiszesz czas pracy.'), t('Karta zadania SprintSpaces z opisem, komentarzami, szczegółami i panelem czasu pracy.')],
+  timeline: [t('PLAN I TERMINY'), t('Zobacz, kiedy zaczynają się i kończą zadania.'), t('Oś czasu pokazuje zapisane daty rozpoczęcia, wysyłki i zakończenia. Zmień skalę z tygodniowej na miesięczną lub zawęź widok do wybranej osoby, typu zadania czy sprintu.'), t('Oś czasu projektu z terminami etapów i zadań.')],
+  time: [t('EWIDENCJA CZASU'), t('Sprawdź, na co poświęcasz czas w ciągu tygodnia.'), t('Dodawaj i poprawiaj wpisy w kalendarzu lub korzystaj z pomiaru czasu przy zadaniu. Gotową kartę tygodnia możesz wysłać do zatwierdzenia, a dane wyeksportować do CSV.'), t('Kalendarz ewidencji czasu pracy z wpisami przypisanymi do zadań.')],
+  reports: [t('POSTĘP I OBCIĄŻENIE'), t('Sprawdź, co jest gotowe i co wymaga uwagi.'), t('Zobacz statusy zadań, zaległe terminy, obciążenie osób i zapisany czas pracy. W osobnym module raportów ustawisz też cykliczną wysyłkę e-mailem i opcjonalne podsumowanie AI.'), t('Raport projektu ze statusami, obciążeniem osób, zaległościami i czasem pracy.')]
 };
 const tabs = [...document.querySelectorAll('[data-view]')];
 function selectView(tab) {
@@ -39,7 +40,7 @@ function selectView(tab) {
   document.querySelector('#gallery-title').textContent = title;
   document.querySelector('#gallery-copy').textContent = copy;
   const image = document.querySelector('#gallery-image');
-  image.src = `assets/screenshots/${view}.webp`;
+  image.src = `/assets/screenshots/${view}.webp`;
   image.alt = alt;
   const link = document.querySelector('#gallery-link');
   link.href = image.src;
@@ -91,25 +92,32 @@ form?.addEventListener('submit', async event => {
   const feedback = document.querySelector('#form-feedback');
   const originalText = button.textContent;
   button.disabled = true;
-  button.textContent = 'Wysyłanie wiadomości…';
+  button.textContent = t('Wysyłanie wiadomości…');
   feedback.hidden = false;
   feedback.dataset.state = 'pending';
-  feedback.textContent = 'Wysyłanie wiadomości…';
+  feedback.textContent = t('Wysyłanie wiadomości…');
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 20000);
   try {
     const response = await fetch(form.action, { method: 'POST', body: new FormData(form), headers: {'Accept': 'application/json'}, signal: controller.signal });
-    if (!response.ok) throw new Error('Nie udało się wysłać wiadomości');
+    if (!response.ok) throw new Error(t('Nie udało się wysłać wiadomości'));
     feedback.dataset.state = 'success';
-    feedback.textContent = 'Dziękuję za wiadomość! Odezwę się, żeby omówić wdrożenie testowe i ustalić termin rozmowy.';
+    feedback.textContent = t('Dziękuję za wiadomość! Odezwę się, żeby omówić wdrożenie testowe i ustalić termin rozmowy.');
     form.reset();
   } catch {
     feedback.dataset.state = 'error';
-    feedback.textContent = 'Nie udało się potwierdzić wysłania. Twoja treść została w formularzu. Spróbuj ponownie lub napisz na do@mleczki.pl.';
+    feedback.textContent = t('Nie udało się potwierdzić wysłania. Twoja treść została w formularzu. Spróbuj ponownie lub napisz na do@mleczki.pl.');
   } finally {
     clearTimeout(timeout);
     button.disabled = false;
     button.textContent = originalText;
     feedback.focus();
   }
+});
+
+// Keep the current section when switching language; plain links also work without JS.
+document.querySelectorAll('[data-language-link]').forEach(link => {
+  const update = () => { link.hash = window.location.hash; };
+  update();
+  window.addEventListener('hashchange', update);
 });
